@@ -1,38 +1,38 @@
-const events = [
-  ['2025–2026', 'Zbieranie materiałów', 'Porządkowanie odpowiedzi instytucji i danych dotyczących hałasu oraz ruchu.'],
-  ['2026', 'Petycja mieszkańców', 'Przygotowanie publicznej petycji i pakietu argumentów.'],
-  ['Obecnie', 'Informowanie i dalsze działania', 'Publikacja dokumentów i aktualizowanie mieszkańców.']
+const timelineEvents = [
+  { date: '2011', title: 'Pomiar i analiza przy ul. Sudeckiej 24', text: 'Powstała historyczna dokumentacja pomiarowa oraz analiza wariantów zabezpieczeń. Materiał opisuje ówczesny stan i nie dowodzi stanu obecnego.' },
+  { date: '2022', title: 'Strategiczne mapowanie hałasu', text: 'Mapa dla Tarnowa, wykonana metodą CNOSSOS-EU, stała się głównym punktem bazowym dla oceny układu DK94 i ul. Lwowskiej.' },
+  { date: '15–25.07.2025', title: 'Interwencja poselska i odpowiedź GDDKiA', text: 'Interwencję skierowano 15 lipca, wpłynęła 18 lipca, a odpowiedź GDDKiA z 25 lipca odwołała się do map strategicznych i braku przekroczeń według modelu.' },
+  { date: '08.01–08.05.2026', title: 'Publiczne informacje o możliwej jednostce wojskowej', text: 'Materiały potwierdziły etap rozpoznawczy; lokalizacja, parametry i układ dojazdowy nie zostały przesądzone.' },
+  { date: '13.05.2026', title: 'Stanowisko ZDiK', text: 'ZDiK przedstawił interpretację wcześniejszych map akustycznych. W pakiecie publicznym zamieszczono opisowy wyciąg bez danych identyfikujących.' },
+  { date: '17.07.2026', title: 'Stan procesu A4–DK94', text: 'Sprawdzono oficjalny stan prac przygotowawczych GDDKiA. Analizowane warianty pozostają scenariuszami, a nie przesądzonym przebiegiem.' },
+  { date: 'Obecnie', title: 'Petycja i etap przygotowawczy', text: 'Wniosek dotyczy audytu danych, programu reprezentatywnych pomiarów i etapowej oceny skumulowanego oddziaływania.' }
 ];
 
 const documents = [
-  ['Petycja mieszkańców', 'Petycja', 'Publiczna wersja petycji bez danych osób popierających.'],
-  ['Pakiet dowodowy', 'Materiały dowodowe', 'Zestaw argumentów i dokumentów źródłowych.'],
-  ['Odpowiedzi instytucji', 'Odpowiedzi', 'Korespondencja i stanowiska instytucji.']
+  { title: 'Petycja wraz z pakietem dowodowym', meta: 'PDF · 45 stron · wersja publiczna', description: 'Zatwierdzony zestaw bez danych osób popierających, obejmujący petycję, mapę orientacyjną i materiały dowodowe.', url: 'dokumenty/zestaw-publiczny-do-bip.pdf' }
 ];
 
 const counterUrl = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-pl/poparcie';
 const supportKey = 'ciszej-poparcie-v1';
 const timeline = document.querySelector('#timeline');
-const docs = document.querySelector('#docs');
-const menu = document.querySelector('#menu');
-const nav = document.querySelector('#nav');
+const documentsContainer = document.querySelector('#documents');
+const menuButton = document.querySelector('#menu-button');
+const nav = document.querySelector('#main-nav');
 const supportButton = document.querySelector('#support-button');
 const supportCount = document.querySelector('#support-count');
 const supportNote = document.querySelector('#support-note');
 
-timeline.innerHTML = events.map(event => `
-  <article class="event">
-    <time>${event[0]}</time>
-    <div><h3>${event[1]}</h3><p>${event[2]}</p></div>
-  </article>
+timeline.innerHTML = timelineEvents.map(({ date, title, text }) => `
+  <li class="timeline-item">
+    <time>${date}</time>
+    <div><h3>${title}</h3><p>${text}</p></div>
+  </li>
 `).join('');
 
-docs.innerHTML = documents.map(document => `
-  <article class="doc">
-    <span class="tag">${document[1]}</span>
-    <h3>${document[0]}</h3>
-    <p>${document[2]}</p>
-    <span class="disabled">Plik zostanie dodany w kolejnym etapie</span>
+documentsContainer.innerHTML = documents.map(({ title, meta, description, url }) => `
+  <article class="document-card">
+    <div><p class="document-meta">${meta}</p><h3>${title}</h3><p>${description}</p></div>
+    <a class="button button-outline" href="${url}" target="_blank" rel="noopener">Otwórz dokument <span aria-hidden="true">↗</span></a>
   </article>
 `).join('');
 
@@ -44,56 +44,76 @@ function supportLabel(value) {
   return `${value} ${noun} inicjatywę`;
 }
 
+function savedSupport() {
+  try { return localStorage.getItem(supportKey) === 'true'; } catch { return false; }
+}
+
+function rememberSupport() {
+  try { localStorage.setItem(supportKey, 'true'); } catch { /* Licznik nadal działa bez pamięci lokalnej. */ }
+}
+
+function setSupportedState() {
+  supportButton.textContent = 'Dziękujemy za poparcie!';
+  supportButton.disabled = true;
+  supportNote.textContent = 'Poparcie zostało już zapisane w tej przeglądarce.';
+}
+
 function showCount(payload) {
-  const value = Number(payload?.count ?? payload?.value ?? 0);
-  supportCount.textContent = supportLabel(Number.isFinite(value) ? value : 0);
+  const value = Number(payload?.count ?? payload?.value);
+  if (!Number.isFinite(value)) throw new Error('Nieprawidłowa odpowiedź licznika');
+  supportCount.textContent = supportLabel(value);
 }
 
 async function loadSupport() {
   try {
     const response = await fetch(counterUrl);
-    if (!response.ok) throw new Error('Counter unavailable');
+    if (!response.ok) throw new Error('Licznik niedostępny');
     showCount(await response.json());
   } catch {
-    supportNote.textContent = 'Nie udało się teraz odświeżyć licznika. Spróbuj ponownie później.';
-    supportNote.classList.add('error');
+    supportCount.textContent = 'Licznik jest chwilowo niedostępny';
+    supportNote.textContent = 'Spróbuj ponownie później.';
+    supportNote.classList.add('is-error');
   }
 }
 
-if (localStorage.getItem(supportKey)) {
-  supportButton.textContent = 'Dziękujemy za poparcie!';
-  supportButton.disabled = true;
-}
+if (savedSupport()) setSupportedState();
 
 supportButton.addEventListener('click', async () => {
+  if (savedSupport()) { setSupportedState(); return; }
   supportButton.disabled = true;
   supportButton.textContent = 'Zapisujemy poparcie…';
-  supportNote.classList.remove('error');
-  supportNote.textContent = 'Jedno poparcie z jednego urządzenia.';
-
+  supportNote.classList.remove('is-error');
   try {
     const response = await fetch(`${counterUrl}/up`);
-    if (!response.ok) throw new Error('Counter unavailable');
+    if (!response.ok) throw new Error('Licznik niedostępny');
     showCount(await response.json());
-    localStorage.setItem(supportKey, 'true');
-    supportButton.textContent = 'Dziękujemy za poparcie!';
+    rememberSupport();
+    setSupportedState();
   } catch {
     supportButton.disabled = false;
     supportButton.textContent = 'Popieram inicjatywę';
     supportNote.textContent = 'Nie udało się zapisać poparcia. Spróbuj ponownie później.';
-    supportNote.classList.add('error');
+    supportNote.classList.add('is-error');
   }
 });
 
-menu.addEventListener('click', () => {
-  const open = nav.classList.toggle('open');
-  menu.setAttribute('aria-expanded', String(open));
+menuButton.addEventListener('click', () => {
+  const open = nav.classList.toggle('is-open');
+  menuButton.setAttribute('aria-expanded', String(open));
 });
 
 nav.addEventListener('click', event => {
   if (event.target.matches('a')) {
-    nav.classList.remove('open');
-    menu.setAttribute('aria-expanded', 'false');
+    nav.classList.remove('is-open');
+    menuButton.setAttribute('aria-expanded', 'false');
+  }
+});
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && nav.classList.contains('is-open')) {
+    nav.classList.remove('is-open');
+    menuButton.setAttribute('aria-expanded', 'false');
+    menuButton.focus();
   }
 });
 
