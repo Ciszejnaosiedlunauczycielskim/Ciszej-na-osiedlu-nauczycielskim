@@ -1,1 +1,1 @@
-{"name": "Ciszej dla Osiedla Nauczycielskiego", "short_name": "Ciszej", "start_url": "./", "display": "standalone", "background_color": "#ffffff", "theme_color": "#b41f24", "icons": [{"src": "assets/img/favicon.svg", "sizes": "any", "type": "image/svg+xml"}]}
+{"name":"Ciszej na Osiedlu Nauczycielskim","short_name":"Ciszej","start_url":"./","display":"standalone","background_color":"#ffffff","theme_color":"#9f252b","icons":[{"src":"assets/img/favicon.svg","sizes":"any","type":"image/svg+xml"}]}

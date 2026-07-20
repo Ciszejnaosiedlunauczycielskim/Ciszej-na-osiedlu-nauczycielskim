@@ -1,7 +1,5 @@
-# Ciszej dla Osiedla Nauczycielskiego — ETAP 1
+# Ciszej na Osiedlu Nauczycielskim
 
 Działający projekt statycznej strony gotowej do GitHub Pages.
 
-Wgraj całą zawartość do głównego katalogu repozytorium `ciszej-dla-osiedla`.
-
-Etap 2: podmiana placeholderów na zdjęcie, mapę i publiczne dokumenty PDF.
+Publiczne dokumenty zostaną dodane w kolejnym etapie.
