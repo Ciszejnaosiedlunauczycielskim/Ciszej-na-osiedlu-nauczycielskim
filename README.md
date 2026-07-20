@@ -2,4 +2,4 @@
 
 Działający projekt statycznej strony gotowej do GitHub Pages.
 
-Publiczne dokumenty zostaną dodane w kolejnym etapie.
+W sekcji „Dokumenty” opublikowano zatwierdzony zestaw publiczny petycji i materiałów, bez danych osób popierających.
