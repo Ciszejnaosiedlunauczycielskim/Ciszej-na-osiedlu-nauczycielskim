@@ -8,7 +8,7 @@
   <meta name="description" content="Obywatelska inicjatywa mieszkańców działająca na rzecz ograniczenia hałasu wokół Osiedla Nauczycielskiego w Tarnowie.">
   <link rel="icon" href="assets/img/favicon.svg">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/style.css?v=7">
 </head>
 <body>
   <a class="skip" href="#main">Przejdź do treści</a>
@@ -33,7 +33,7 @@
     <section class="hero" id="top">
       <div class="wrap hero-in">
         <p class="eyebrow">Obywatelska inicjatywa mieszkańców</p>
-        <h1>Petycja mieszkańców Osiedla Nauczycielskiego</h1>
+        <h1>Petycja mieszkańców<br>Osiedla Nauczycielskiego</h1>
         <p class="lead">W sprawie przeprowadzenia aktualnej i perspektywicznej analizy skumulowanego hałasu komunikacyjnego oraz — w razie wykazania potrzeby — przygotowania i realizacji skutecznych środków ochrony.</p>
         <div class="actions">
           <a class="btn red" href="#sprawa">Poznaj petycję</a>
@@ -71,7 +71,24 @@
       <div class="wrap">
         <p class="eyebrow">Stan sprawy</p>
         <h2>Najważniejsze działania</h2>
-        <div id="timeline" class="timeline"></div>
+        <div class="timeline">
+          <article class="event">
+            <time datetime="2011-09-06">6–7 września 2011</time>
+            <div><h3>Pomiary przy południowej obwodnicy</h3><p>Przeprowadzono pomiary hałasu, w tym w punkcie przy ul. Sudeckiej 24.</p></div>
+          </article>
+          <article class="event">
+            <time datetime="2022">2022</time>
+            <div><h3>Strategiczna mapa hałasu</h3><p>Miasto sporządziło strategiczną mapę hałasu.</p></div>
+          </article>
+          <article class="event">
+            <time datetime="2026-05-13">13 maja 2026</time>
+            <div><h3>Stanowisko ZDiK</h3><p>Zarząd Dróg i Komunikacji przedstawił stanowisko dotyczące interpretacji wcześniejszych map.</p></div>
+          </article>
+          <article class="event">
+            <time datetime="2026-05-28">28 maja 2026</time>
+            <div><h3>Rozpoczęcie robót na ul. Lwowskiej</h3><p>Rozpoczęły się roboty na ostatnim odcinku ul. Lwowskiej — od szpitala do granicy miasta.</p></div>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -79,7 +96,14 @@
       <div class="wrap">
         <p class="eyebrow">Materiały źródłowe</p>
         <h2>Publiczny zestaw dokumentów</h2>
-        <div id="docs" class="docs"></div>
+        <div class="docs">
+          <article class="doc">
+            <span class="tag">PDF · 45 stron</span>
+            <h3>Petycja w interesie publicznym — zestaw publiczny</h3>
+            <p>Petycja, załączniki, wykaz źródeł i dokumenty przeznaczone do publikacji.</p>
+            <a class="doc-link" href="documents/zestaw-publiczny-osiedle-nauczycielskie.pdf" target="_blank" rel="noopener">Otwórz publiczny PDF <span class="visually-hidden">w nowej karcie</span></a>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -89,8 +113,8 @@
         <h2>Popierasz inicjatywę?</h2>
         <p>Wyraź symboliczne poparcie dla działań mieszkańców. Nie jest to podpis pod petycją i nie zbieramy żadnych danych osobowych.</p>
         <button class="btn red support-button" id="support-button" type="button">Popieram inicjatywę</button>
-        <p class="support-count" id="support-count" aria-live="polite">0 osób popiera inicjatywę</p>
-        <p class="support-note" id="support-note">Jedno poparcie z jednego urządzenia.</p>
+        <p class="support-count" id="support-count" role="status">Pobieramy aktualny wynik…</p>
+        <p class="support-note" id="support-note">Przeglądarka zapamięta poparcie na tym urządzeniu.</p>
       </div>
     </section>
 
@@ -119,6 +143,6 @@
       <a href="mailto:ciszejnaosiedlunauczycielskim@gmail.com">ciszejnaosiedlunauczycielskim@gmail.com</a>
     </div>
   </footer>
-  <script src="assets/js/app.js" defer></script>
+  <script src="assets/js/app.js?v=7" defer></script>
 </body>
 </html>
