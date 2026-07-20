@@ -2,4 +2,4 @@
 
 Działający projekt statycznej strony gotowej do GitHub Pages.
 
-Publiczne dokumenty zostaną dodane w kolejnym etapie.
+Strona udostępnia zatwierdzony, 45-stronicowy publiczny zestaw dokumentów w formacie PDF.

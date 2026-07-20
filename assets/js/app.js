@@ -1,13 +1,17 @@
 const events = [
-  ['2025–2026', 'Zbieranie materiałów', 'Porządkowanie odpowiedzi instytucji i danych dotyczących hałasu oraz ruchu.'],
-  ['2026', 'Petycja mieszkańców', 'Przygotowanie publicznej petycji i pakietu argumentów.'],
-  ['Obecnie', 'Informowanie i dalsze działania', 'Publikacja dokumentów i aktualizowanie mieszkańców.']
+  ['6–7.09.2011', 'Pomiary przy południowej obwodnicy', 'Pomiary przy południowej obwodnicy, w tym przy ul. Sudeckiej 24.'],
+  ['2022', 'Strategiczna mapa hałasu', 'Sporządzenie miejskiej strategicznej mapy hałasu.'],
+  ['13.05.2026', 'Stanowisko ZDiK', 'Stanowisko ZDiK dotyczące interpretacji wcześniejszych map.'],
+  ['28.05.2026', 'Rozpoczęcie robót', 'Rozpoczęcie robót na ostatnim odcinku ul. Lwowskiej od szpitala do granicy miasta.']
 ];
 
 const documents = [
-  ['Petycja mieszkańców', 'Petycja', 'Publiczna wersja petycji bez danych osób popierających.'],
-  ['Pakiet dowodowy', 'Materiały dowodowe', 'Zestaw argumentów i dokumentów źródłowych.'],
-  ['Odpowiedzi instytucji', 'Odpowiedzi', 'Korespondencja i stanowiska instytucji.']
+  {
+    title: 'Petycja w interesie publicznym — zestaw publiczny',
+    tag: '45 stron',
+    description: 'Petycja, załączniki, wykaz źródeł i dokumenty przeznaczone do publikacji.',
+    href: 'documents/zestaw-publiczny-osiedle-nauczycielskie.pdf'
+  }
 ];
 
 const counterUrl = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-pl/poparcie';
@@ -29,10 +33,10 @@ timeline.innerHTML = events.map(event => `
 
 docs.innerHTML = documents.map(document => `
   <article class="doc">
-    <span class="tag">${document[1]}</span>
-    <h3>${document[0]}</h3>
-    <p>${document[2]}</p>
-    <span class="disabled">Plik zostanie dodany w kolejnym etapie</span>
+    <span class="tag">${document.tag}</span>
+    <h3>${document.title}</h3>
+    <p>${document.description}</p>
+    <a class="doc-link" href="${document.href}" target="_blank" rel="noopener">Otwórz publiczny PDF (45 stron)</a>
   </article>
 `).join('');
 
