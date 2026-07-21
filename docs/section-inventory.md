@@ -11,25 +11,26 @@ Przed każdą większą zmianą należy:
 3. nie usuwać elementów niewymienionych w zadaniu,
 4. po wykonaniu zmian zaktualizować ten plik.
 
-## Stan po realizacji issue #11
+## Stan po realizacji issue #13
 
 ### Strona główna (`index.html`)
 
-| Kolejność | Sekcja / element | Status w issue #11 |
+| Kolejność | Sekcja / element | Status w issue #13 |
 |---:|---|---|
-| 1 | Nawigacja główna | Zmieniona — dodano odsyłacz do sekcji „Dlaczego właśnie teraz?”; pozostałe odsyłacze pozostają dostępne. |
-| 2 | Hero | Zmieniony — wskazuje potrzebę zbadania hałasu przed możliwym wzrostem ruchu i prowadzi do nowej sekcji oraz celu inicjatywy. |
+| 1 | Nawigacja główna | Zmieniona — dodano odsyłacz do „Co już wiemy?”, a odsyłacz do uzasadnienia prowadzi do sekcji ponownej oceny; zachowano pozostałe pozycje i działanie menu mobilnego. |
+| 2 | Hero | Zmieniony — głównym przekazem jest potrzeba pełnego obrazu skumulowanego hałasu z dwóch dróg oddziałującego na jedno osiedle. |
 | 3 | Najważniejsze informacje | Zachowana bez zmian funkcjonalnych. |
 | 4 | Osiedle z lotu ptaka | Dodana — główna sekcja z zatwierdzonym zdjęciem dronowym. |
-| 5 | Lokalizacja | Dodana — główna sekcja z zatwierdzoną mapą. |
-| 6 | „Dlaczego właśnie teraz?” | Dodana — pięć kart wyraźnie rozdziela istniejące i potwierdzone uwarunkowania od potencjalnej jednostki wojskowej i planowanej wschodniej obwodnicy; dla niepewnych scenariuszy zachowano język warunkowy. |
-| 7 | „Co chcemy sprawdzić?” | Zachowana bez zmian. |
-| 8 | „Dlaczego obecne dane nie wystarczają?” | Zachowana bez zmian; nadal prowadzi do historii sprawy. |
-| 9 | Publiczny zestaw dokumentów (PDF) | Zachowana bez zmian funkcjonalnych. |
-| 10 | Symboliczne poparcie i licznik | Zachowane bez zmian funkcjonalnych. |
-| 11 | FAQ | Zachowane bez zmian funkcjonalnych. |
-| 12 | Kontakt | Zachowany bez zmian funkcjonalnych. |
-| 13 | Stopka | Zachowana bez zmian funkcjonalnych. |
+| 5 | „Co już wiemy?” | Dodana — cztery karty porządkują informacje o dwóch drogach, pomiarze z 2011 r., mapie z 2022 r. i braku aktualnej wspólnej oceny. |
+| 6 | Lokalizacja | Zmieniona — zachowuje zatwierdzoną grafikę, otrzymuje tytuł „Schemat orientacyjny położenia osiedla” i pełne zastrzeżenie dotyczące charakteru schematu. |
+| 7 | „Dlaczego sytuację trzeba ocenić ponownie?” | Zmieniona — istniejące drogi i potwierdzone zmiany, w tym Park Lwowska jako generator ruchu, są wyraźnie oddzielone od warunkowych scenariuszy jednostki wojskowej i Wschodniej Obwodnicy. |
+| 8 | „Co chcemy sprawdzić?” | Zachowana bez zmian funkcjonalnych. |
+| 9 | „Dlaczego obecne dane nie wystarczają?” | Zachowana bez zmian; nadal prowadzi do historii sprawy. |
+| 10 | Publiczny zestaw dokumentów (PDF) | Zachowana bez zmian funkcjonalnych. |
+| 11 | Symboliczne poparcie i licznik | Zachowane bez zmian funkcjonalnych. |
+| 12 | FAQ | Zachowane bez zmian funkcjonalnych. |
+| 13 | Kontakt | Zachowany bez zmian funkcjonalnych. |
+| 14 | Stopka | Zachowana bez zmian funkcjonalnych. |
 
 ### Podstrona (`historia-sprawy.html`)
 
@@ -41,4 +42,4 @@ Przed każdą większą zmianą należy:
 
 ### Elementy usunięte lub przeniesione
 
-Nie usunięto ani nie przeniesiono żadnej funkcji lub sekcji w ramach issue #11. Chronologia pozostaje wyłącznie na osobnej podstronie i nie została przywrócona na stronie głównej.
+Nie usunięto ani nie przeniesiono żadnej funkcji lub sekcji w ramach issue #13. Chronologia pozostaje wyłącznie na osobnej podstronie i nie została przywrócona na stronie głównej. Zachowano zdjęcie, PDF, licznik poparcia, FAQ, kontakt, menu mobilne i podstronę historii.
