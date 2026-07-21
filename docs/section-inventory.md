@@ -18,19 +18,20 @@ Przed każdą większą zmianą należy:
 | Kolejność | Sekcja / element | Status w issue #13 |
 |---:|---|---|
 | 1 | Nawigacja główna | Zmieniona — dodano odsyłacz do „Co już wiemy?”, a odsyłacz do uzasadnienia prowadzi do sekcji ponownej oceny; zachowano pozostałe pozycje i działanie menu mobilnego. |
-| 2 | Hero | Zmieniony — głównym przekazem jest potrzeba pełnego obrazu skumulowanego hałasu z dwóch dróg oddziałującego na jedno osiedle. |
-| 3 | Najważniejsze informacje | Zachowana bez zmian funkcjonalnych. |
-| 4 | Osiedle z lotu ptaka | Dodana — główna sekcja z zatwierdzonym zdjęciem dronowym. |
-| 5 | „Co już wiemy?” | Dodana — cztery karty porządkują informacje o dwóch drogach, pomiarze z 2011 r., mapie z 2022 r. i braku aktualnej wspólnej oceny. |
-| 6 | Lokalizacja | Zmieniona — zachowuje zatwierdzoną grafikę, otrzymuje tytuł „Schemat orientacyjny położenia osiedla” i pełne zastrzeżenie dotyczące charakteru schematu. |
-| 7 | „Dlaczego sytuację trzeba ocenić ponownie?” | Zmieniona — istniejące drogi i potwierdzone zmiany, w tym Park Lwowska jako generator ruchu, są wyraźnie oddzielone od warunkowych scenariuszy jednostki wojskowej i Wschodniej Obwodnicy. |
+| 2 | Hero | Zmieniony — głównym przekazem jest potrzeba pełnego obrazu skumulowanego hałasu z dwóch dróg oddziałującego na jedno osiedle; przyciski prowadzą do schematu i dokumentów. |
+| 3 | Osiedle z lotu ptaka | Zachowana — główna sekcja z zatwierdzonym zdjęciem dronowym. |
+| 4 | Lokalizacja | Zmieniona — występuje bezpośrednio po zdjęciu, zachowuje zatwierdzoną grafikę, tytuł „Schemat orientacyjny położenia osiedla” i pełne zastrzeżenie dotyczące ograniczeń schematu. |
+| 5 | „Co już wiemy?” | Dodana — cztery karty przedstawiają zakresy ruchu na DK94 i ul. Lwowskiej z 2022 r., parametry punktów drogowych oraz historyczny wynik z ul. Sudeckiej; pod kartami zaznaczono, że dane są punktem wyjścia. |
+| 6 | „Dlaczego sytuację trzeba ocenić ponownie?” | Zmieniona — opisuje położenie między drogami, rozbudowę Lwowskiej, prognozy ruchu Parku Lwowska i rozwój zabudowy; fakty są wyraźnie oddzielone od warunkowych scenariuszy jednostki wojskowej i zmian układu drogowego. Zastrzeżenie wskazuje, że petycja nie sprzeciwia się Parkowi ani nie kwestionuje decyzji środowiskowej. |
+| 7 | Najważniejsze informacje | Zachowana bez zmian funkcjonalnych i przeniesiona za blok wyjaśniający potrzebę ponownej oceny. |
 | 8 | „Co chcemy sprawdzić?” | Zachowana bez zmian funkcjonalnych. |
 | 9 | „Dlaczego obecne dane nie wystarczają?” | Zachowana bez zmian; nadal prowadzi do historii sprawy. |
-| 10 | Publiczny zestaw dokumentów (PDF) | Zachowana bez zmian funkcjonalnych. |
-| 11 | Symboliczne poparcie i licznik | Zachowane bez zmian funkcjonalnych. |
-| 12 | FAQ | Zachowane bez zmian funkcjonalnych. |
-| 13 | Kontakt | Zachowany bez zmian funkcjonalnych. |
-| 14 | Stopka | Zachowana bez zmian funkcjonalnych. |
+| 10 | Wyróżniony główny przekaz | Dodany przed dokumentami — podsumowuje, że przedmiotem sprawy jest łączny hałas, a nie jedna droga lub inwestycja. |
+| 11 | Publiczny zestaw dokumentów (PDF) | Zachowana bez zmian funkcjonalnych. |
+| 12 | Symboliczne poparcie i licznik | Zachowane bez zmian funkcjonalnych. |
+| 13 | FAQ | Zachowane bez zmian funkcjonalnych. |
+| 14 | Kontakt | Zachowany bez zmian funkcjonalnych. |
+| 15 | Stopka | Zachowana bez zmian funkcjonalnych. |
 
 ### Podstrona (`historia-sprawy.html`)
 
