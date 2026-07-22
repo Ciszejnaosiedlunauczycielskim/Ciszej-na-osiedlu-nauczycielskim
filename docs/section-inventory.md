@@ -45,6 +45,25 @@ Przed każdą większą zmianą należy:
 
 Nie usunięto ani nie przeniesiono żadnej funkcji lub sekcji w ramach issue #13. Chronologia pozostaje wyłącznie na osobnej podstronie i nie została przywrócona na stronie głównej. Zachowano zdjęcie, PDF, licznik poparcia, FAQ, kontakt, menu mobilne i podstronę historii.
 
+## Stan po reorganizacji strony głównej
+
+### Nowa struktura opowieści (`index.html`)
+
+1. **Sprawa** — skrócony hero przedstawia jeden problem (hałas docierający z dwóch stron) i jeden cel (audyt oraz reprezentatywne pomiary).
+2. **Położenie** — mapa z orientacyjnym oznaczeniem Parku Lwowska i zdjęcie z drona tworzą wspólny rozdział „Gdzie znajduje się problem?”. Nowa mapa nie zastępuje mapy geodezyjnej ani dokładnego odwzorowania granic inwestycji; wcześniejszy plik mapy pozostaje w repozytorium, ale nie jest wyświetlany na stronie głównej.
+3. **Dowody** — cztery fakty, w kolejności: pomiar przy ul. Sudeckiej z 2011 r., punkty przy DK94 z 2022 r., ruch w punktach PDH oraz potwierdzona skala Parku Lwowska. Bezpośrednio po nich występuje jeden blok „Czego nadal nie wiemy?”.
+4. **Zmiany w otoczeniu** — na pierwszym planie pozostają wyłącznie rozbudowa ul. Lwowskiej i Park Lwowska. Warunkowe scenariusze jednostki wojskowej i miejskiego wariantu wschodniej obwodnicy przeniesiono do zwiniętego elementu `details`, zachowując zastrzeżenia i źródła.
+5. **Postulaty** — rozproszone wcześniej uzasadnienia i listy celów połączono w jeden centralny, czteropunktowy rozdział „Czego domagają się mieszkańcy?”.
+6. **Wyniki i normy** — WHO, polskie wartości oraz wyjaśnienie wskaźników przeniesiono poniżej dowodów i postulatów. Szczegółowe porównanie wskaźników umieszczono w rozwijanym bloku.
+7. **Dokumenty i udział** — uproszczona prezentacja publicznego PDF, odsyłacz do zachowanej historii sprawy, licznik symbolicznego poparcia, FAQ i kontakt zamykają opowieść.
+
+### Połączone i usunięte powtórzenia
+
+- Sekcje „Dlaczego sytuację trzeba ocenić ponownie?”, „Co chcemy sprawdzić?”, „Dlaczego obecne dane nie wystarczają?” i „Spokojnie, rzeczowo, na podstawie dokumentów” nie występują już jako osobne rozdziały. Ich istotny sens został przeniesiony odpowiednio do hero, bloku niewiadomych, zmian w otoczeniu i postulatów.
+- Usunięto powtarzający główny przekaz czerwony pasek oraz pasek zbiorczy „Obszar / Analizowane drogi / Najważniejsze oczekiwane rozstrzygnięcie”.
+- Nawigacja obejmuje sześć głównych etapów: Sprawa, Dowody, Co się zmienia, Postulaty, Dokumenty i Poparcie. FAQ oraz kontakt pozostają dostępne w dalszej części strony.
+- Zdjęcie z drona, publiczny PDF, licznik poparcia, FAQ, kontakt i osobna historia sprawy zachowują swoje funkcje.
+
 ## Stan po realizacji issue #15
 
 ### Strona główna (`index.html`)
