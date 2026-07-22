@@ -57,7 +57,7 @@ Nie usunięto ani nie przeniesiono żadnej funkcji lub sekcji w ramach issue #13
 | 4 | Lokalizacja | Zachowana bez zmiany grafiki poglądowej i jej zastrzeżenia. |
 | 5 | „Co już wiemy?” | Zmieniona — pokazuje PDH jako oznaczenia czterech punktów, a ruch w pojazdach na dobę; wartości nie są uśredniane ani sumowane. |
 | 6 | „Dlaczego hałas ma znaczenie?” | Dodana — trzy krótkie karty opisują sen, dobrostan oraz dom i otoczenie; pod nimi podano zalecenia WHO, źródło i zastrzeżenie, że nie są to polskie normy prawne. |
-| 7 | „Dlaczego sytuację trzeba ocenić ponownie?” | Zmieniona — zachowuje rozdzielenie faktów i scenariuszy; dodano źródła dotyczące jednostki wojskowej i Wschodniej Obwodnicy Tarnowa. Zapowiedź możliwego finansowania do 90% opisano wyłącznie przy obwodnicy, jako warunkową i niegwarantowaną; usunięto błędną kartę o finansowaniu ochrony akustycznej. |
+| 7 | „Dlaczego sytuację trzeba ocenić ponownie?” | Zmieniona — karta „Jednostka wojskowa — możliwa lokalizacja we wschodniej części Tarnowa” opisuje wyłącznie publicznie rozważaną, niezatwierdzoną lokalizację. Karta „Wschodnia obwodnica — wariant w granicach miasta Tarnowa” dotyczy wyłącznie możliwego odcinka miejskiego; finansowanie do 90% i przebieg pozostają warunkowe i niezatwierdzone. Zaktualizowano źródła obu kart. |
 | 8 | Najważniejsze informacje | Zachowana bez zmian funkcjonalnych. |
 | 9 | „Co chcemy sprawdzić?” | Zachowana bez zmian funkcjonalnych. |
 | 10 | „Dlaczego obecne dane nie wystarczają?” | Zachowana wraz z odsyłaczem do historii sprawy. |
