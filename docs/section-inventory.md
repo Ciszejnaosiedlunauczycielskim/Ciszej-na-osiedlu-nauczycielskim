@@ -76,3 +76,13 @@ Podstrona historii sprawy, jej chronologia, nagłówek, powrót i stopka został
 ### Elementy usunięte lub przeniesione
 
 Nie usunięto ani nie przeniesiono żadnej istniejącej sekcji lub funkcji. Zachowano zdjęcie z drona, grafikę poglądową, PDF, licznik poparcia, FAQ, kontakt, menu mobilne i historię sprawy.
+
+## Stan po kolejnej całościowej korekcie PR #16
+
+### Zmiany struktury i treści strony głównej (`index.html`)
+
+- Sekcję „Jak czytać wyniki hałasu?” z zaleceniami WHO i polskimi wartościami dopuszczalnymi przeniesiono przed szczegółowe wyniki pomiarów, aby najpierw wyjaśnić sposób interpretacji wskaźników i zależność normy od kwalifikacji terenu.
+- Przebudowano karty pomiarowe: pomiar przy ul. Sudeckiej 24 z 2011 r. pokazuje wartości, ówczesne kryteria i wyliczone przekroczenia, a karta punktów 08D i 48D wyjaśnia ich położenie, wyniki oraz cel kontroli modelu strategicznej mapy hałasu.
+- Usunięto kartę „Kolejna zabudowa mieszkaniowa i usługowa”; wśród zmian potwierdzonych pozostały położenie osiedla, rozbudowa ul. Lwowskiej oraz Park Lwowska.
+- Uproszczono kartę możliwej jednostki wojskowej, zachowując ją jako wyraźnie oznaczony scenariusz potencjalny i opisując niepewność lokalizacji oraz tras dojazdu prostszym językiem.
+- Zachowano zdjęcie z drona, grafikę poglądową, dokument PDF, licznik poparcia, FAQ, kontakt, menu mobilne, historię sprawy i sekcję „Spokojnie, rzeczowo, na podstawie dokumentów”.
