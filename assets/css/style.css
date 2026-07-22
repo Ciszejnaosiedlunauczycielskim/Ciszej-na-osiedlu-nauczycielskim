@@ -40,3 +40,5 @@
   .section{padding:3rem 0}
   .doc,.event,details{padding:.85rem}
 }
+.health{background:#fff}.health-guidance{margin-top:1.5rem;padding:1.5rem;border:1px solid #c9dcd3;border-radius:1rem;background:#f1f8f4}.health-guidance h3{margin-top:0}.health-guidance p:last-child{margin-bottom:0}.legal-note{padding-left:1rem;border-left:3px solid var(--red)}.source-link{color:var(--red);font-weight:750;text-underline-offset:.2em;overflow-wrap:anywhere}.now-card .source-link{font-size:.9rem}.calm{background:var(--soft)}
+@media(max-width:600px){.health-guidance{padding:1rem}.now-card .source-link{font-size:.86rem}}
