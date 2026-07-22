@@ -44,3 +44,35 @@ Przed każdą większą zmianą należy:
 ### Elementy usunięte lub przeniesione
 
 Nie usunięto ani nie przeniesiono żadnej funkcji lub sekcji w ramach issue #13. Chronologia pozostaje wyłącznie na osobnej podstronie i nie została przywrócona na stronie głównej. Zachowano zdjęcie, PDF, licznik poparcia, FAQ, kontakt, menu mobilne i podstronę historii.
+
+## Stan po realizacji issue #15
+
+### Strona główna (`index.html`)
+
+| Kolejność | Sekcja / element | Status w issue #15 |
+|---:|---|---|
+| 1 | Nawigacja główna | Zmieniona — dodano odsyłacz „Dlaczego hałas?”, zachowano wszystkie wcześniejsze pozycje i menu mobilne. |
+| 2 | Hero | Zmieniony — zastosowano krótszy, przyjazny mieszkańcom lead wskazujący na potrzebę aktualnych pomiarów przy domach. |
+| 3 | Osiedle z lotu ptaka | Zachowana bez zmiany zdjęcia dronowego. |
+| 4 | Lokalizacja | Zachowana bez zmiany grafiki poglądowej i jej zastrzeżenia. |
+| 5 | „Co już wiemy?” | Zmieniona — pokazuje PDH jako oznaczenia czterech punktów, a ruch w pojazdach na dobę; wartości nie są uśredniane ani sumowane. |
+| 6 | „Dlaczego hałas ma znaczenie?” | Dodana — trzy krótkie karty opisują sen, dobrostan oraz dom i otoczenie; pod nimi podano zalecenia WHO, źródło i zastrzeżenie, że nie są to polskie normy prawne. |
+| 7 | „Dlaczego sytuację trzeba ocenić ponownie?” | Zmieniona — karta „Jednostka wojskowa — możliwa lokalizacja we wschodniej części Tarnowa” opisuje wyłącznie publicznie rozważaną, niezatwierdzoną lokalizację. Karta „Wschodnia obwodnica — wariant w granicach miasta Tarnowa” dotyczy wyłącznie możliwego odcinka miejskiego; finansowanie do 90% i przebieg pozostają warunkowe i niezatwierdzone. Zaktualizowano źródła obu kart. |
+| 8 | Najważniejsze informacje | Zachowana bez zmian funkcjonalnych. |
+| 9 | „Co chcemy sprawdzić?” | Zachowana bez zmian funkcjonalnych. |
+| 10 | „Dlaczego obecne dane nie wystarczają?” | Zachowana wraz z odsyłaczem do historii sprawy. |
+| 11 | Wyróżniony główny przekaz | Zachowany bez zmian funkcjonalnych. |
+| 12 | „Spokojnie, rzeczowo, na podstawie dokumentów” | Dodana — wyjaśnia przyjaznym językiem sposób działania mieszkańców. |
+| 13 | Publiczny zestaw dokumentów (PDF) | Zachowana bez zmian funkcjonalnych. |
+| 14 | Symboliczne poparcie i licznik | Zachowane bez zmian funkcjonalnych. |
+| 15 | FAQ | Zachowane bez zmian funkcjonalnych. |
+| 16 | Kontakt | Zachowany bez zmian funkcjonalnych. |
+| 17 | Stopka | Zachowana bez zmian funkcjonalnych. |
+
+### Podstrona (`historia-sprawy.html`)
+
+Podstrona historii sprawy, jej chronologia, nagłówek, powrót i stopka zostały zachowane bez zmian.
+
+### Elementy usunięte lub przeniesione
+
+Nie usunięto ani nie przeniesiono żadnej istniejącej sekcji lub funkcji. Zachowano zdjęcie z drona, grafikę poglądową, PDF, licznik poparcia, FAQ, kontakt, menu mobilne i historię sprawy.
