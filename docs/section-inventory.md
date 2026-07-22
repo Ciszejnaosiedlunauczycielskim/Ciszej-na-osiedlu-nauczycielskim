@@ -52,12 +52,12 @@ Nie usunięto ani nie przeniesiono żadnej funkcji lub sekcji w ramach issue #13
 | Kolejność | Sekcja / element | Status w issue #15 |
 |---:|---|---|
 | 1 | Nawigacja główna | Zmieniona — dodano odsyłacz „Dlaczego hałas?”, zachowano wszystkie wcześniejsze pozycje i menu mobilne. |
-| 2 | Hero | Zmieniony — przy pierwszym użyciu zastosowano pełną nazwę „nowy park handlowy Park Lwowska przy ul. Lwowskiej” i narrację „my — mieszkańcy”. |
+| 2 | Hero | Zmieniony — zastosowano krótszy, przyjazny mieszkańcom lead wskazujący na potrzebę aktualnych pomiarów przy domach. |
 | 3 | Osiedle z lotu ptaka | Zachowana bez zmiany zdjęcia dronowego. |
 | 4 | Lokalizacja | Zachowana bez zmiany grafiki poglądowej i jej zastrzeżenia. |
-| 5 | „Co już wiemy?” | Zmieniona — zamiast zakresów lub średniej pokazuje osobno konkretne wartości PDH dla obu punktów na każdej drodze. |
-| 6 | „Dlaczego hałas ma znaczenie?” | Dodana — zawiera zalecenia WHO dla hałasu drogowego, źródło oraz jasne zastrzeżenie, że nie są to polskie normy prawne. |
-| 7 | „Dlaczego sytuację trzeba ocenić ponownie?” | Zmieniona — zachowuje rozdzielenie faktów i scenariuszy; dodano źródła dotyczące jednostki wojskowej, Wschodniej Obwodnicy Tarnowa oraz warunkowej możliwości finansowania do 90%. |
+| 5 | „Co już wiemy?” | Zmieniona — pokazuje PDH jako oznaczenia czterech punktów, a ruch w pojazdach na dobę; wartości nie są uśredniane ani sumowane. |
+| 6 | „Dlaczego hałas ma znaczenie?” | Dodana — trzy krótkie karty opisują sen, dobrostan oraz dom i otoczenie; pod nimi podano zalecenia WHO, źródło i zastrzeżenie, że nie są to polskie normy prawne. |
+| 7 | „Dlaczego sytuację trzeba ocenić ponownie?” | Zmieniona — zachowuje rozdzielenie faktów i scenariuszy; dodano źródła dotyczące jednostki wojskowej i Wschodniej Obwodnicy Tarnowa. Zapowiedź możliwego finansowania do 90% opisano wyłącznie przy obwodnicy, jako warunkową i niegwarantowaną; usunięto błędną kartę o finansowaniu ochrony akustycznej. |
 | 8 | Najważniejsze informacje | Zachowana bez zmian funkcjonalnych. |
 | 9 | „Co chcemy sprawdzić?” | Zachowana bez zmian funkcjonalnych. |
 | 10 | „Dlaczego obecne dane nie wystarczają?” | Zachowana wraz z odsyłaczem do historii sprawy. |
