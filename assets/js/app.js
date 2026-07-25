@@ -68,16 +68,30 @@ supportButton.addEventListener('click', async () => {
   }
 });
 
+function closeMenu({ returnFocus = false } = {}) {
+  nav.classList.remove('open');
+  menu.setAttribute('aria-expanded', 'false');
+  if (returnFocus) menu.focus();
+}
+
 menu.addEventListener('click', () => {
   const open = nav.classList.toggle('open');
   menu.setAttribute('aria-expanded', String(open));
+  if (open) nav.querySelector('a')?.focus();
 });
 
 nav.addEventListener('click', event => {
-  if (event.target.matches('a')) {
-    nav.classList.remove('open');
-    menu.setAttribute('aria-expanded', 'false');
+  if (event.target.matches('a')) closeMenu();
+});
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && nav.classList.contains('open')) {
+    closeMenu({ returnFocus: true });
   }
+});
+
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 900 && nav.classList.contains('open')) closeMenu();
 });
 
 document.querySelector('#year').textContent = new Date().getFullYear();
