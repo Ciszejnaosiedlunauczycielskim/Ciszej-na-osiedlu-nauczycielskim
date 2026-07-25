@@ -88,5 +88,6 @@ jobs:
             echo "Brak nowych zmian obrazów."
           else
             git commit -m "Dodaj wierne wersje obrazów 4K"
+            git pull --rebase origin chatgpt/audyt-i-poprawki-strony
             git push origin HEAD:chatgpt/audyt-i-poprawki-strony
           fi
