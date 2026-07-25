@@ -1,0 +1,83 @@
+name: Przygotowanie obrazów 4K
+
+on:
+  push:
+    branches:
+      - chatgpt/audyt-i-poprawki-strony
+    paths:
+      - .github/workflows/build-4k-assets.yml
+      - assets/img/IMG_5375.jpeg
+      - assets/img/mapa-osiedla-nauczycielskiego-tarnow-nowa.avif
+      - assets/img/brak-paneli-akustycznych-przy-obwodnicy.avif
+
+permissions:
+  contents: write
+
+jobs:
+  build-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobierz repozytorium
+        uses: actions/checkout@v4
+        with:
+          ref: chatgpt/audyt-i-poprawki-strony
+          fetch-depth: 0
+
+      - name: Zainstaluj narzędzia obrazu
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick libavif-bin webp
+
+      - name: Utwórz wierne wersje 4K
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          magick assets/img/IMG_5375.jpeg \
+            -filter Lanczos -resize 3840x2160! -strip -quality 88 \
+            assets/img/osiedle-miedzy-drogami-4k.webp
+          magick assets/img/IMG_5375.jpeg \
+            -filter Lanczos -resize 3840x2160! -strip -quality 92 \
+            assets/img/osiedle-miedzy-drogami-4k.jpg
+
+          avifdec assets/img/mapa-osiedla-nauczycielskiego-tarnow-nowa.avif /tmp/mapa.png
+          magick /tmp/mapa.png \
+            -filter Lanczos -resize 3840x2160! -strip -quality 92 \
+            assets/img/mapa-osiedle-park-lwowska-4k.webp
+          magick /tmp/mapa.png \
+            -filter Lanczos -resize 3840x2160! -strip -quality 94 \
+            assets/img/mapa-osiedle-park-lwowska-4k.jpg
+
+          avifdec assets/img/brak-paneli-akustycznych-przy-obwodnicy.avif /tmp/panel.png
+          magick /tmp/panel.png \
+            -filter Lanczos -resize 3840x2160! -strip -quality 88 \
+            assets/img/brak-panelu-przy-osiedlu-4k.webp
+          magick /tmp/panel.png \
+            -filter Lanczos -resize 3840x2160! -strip -quality 92 \
+            assets/img/brak-panelu-przy-osiedlu-4k.jpg
+
+      - name: Sprawdź pliki
+        run: |
+          set -euo pipefail
+          for file in \
+            assets/img/osiedle-miedzy-drogami-4k.webp \
+            assets/img/osiedle-miedzy-drogami-4k.jpg \
+            assets/img/mapa-osiedle-park-lwowska-4k.webp \
+            assets/img/mapa-osiedle-park-lwowska-4k.jpg \
+            assets/img/brak-panelu-przy-osiedlu-4k.webp \
+            assets/img/brak-panelu-przy-osiedlu-4k.jpg; do
+            test -s "$file"
+            test "$(identify -format '%wx%h' "$file")" = "3840x2160"
+          done
+
+      - name: Zapisz obrazy na gałęzi
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/img/*-4k.webp assets/img/*-4k.jpg
+          if git diff --cached --quiet; then
+            echo "Brak nowych zmian obrazów."
+          else
+            git commit -m "Dodaj wierne wersje obrazów 4K"
+            git push origin HEAD:chatgpt/audyt-i-poprawki-strony
+          fi
