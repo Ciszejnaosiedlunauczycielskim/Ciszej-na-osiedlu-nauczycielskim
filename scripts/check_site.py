@@ -11,6 +11,7 @@ REQUIRED_FILES = [
     ROOT / "assets/img/osiedle-miedzy-drogami-4k.jpg",
     ROOT / "assets/img/brak-panelu-przy-osiedlu-4k.webp",
     ROOT / "assets/img/brak-panelu-przy-osiedlu-4k.jpg",
+    ROOT / "assets/img/mapa-osiedla-nauczycielskiego-tarnow-nowa.avif",
     ROOT / "assets/img/mapa-osiedle-park-lwowska-4k.webp",
     ROOT / "assets/img/mapa-osiedle-park-lwowska-4k.jpg",
     ROOT / "assets/img/wizualizacja-parku-handlowego-lwowska-redkom.jpg",
@@ -32,6 +33,12 @@ FORBIDDEN_HOME_FRAGMENTS = [
     "snapshot-grid",
     "journey-step",
     "editorialStyles",
+    'id="map-scroll"',
+]
+REQUIRED_HOME_FRAGMENTS = [
+    "map-layout",
+    "map-detail-crop",
+    "Planowana jednostka wojskowa w Tarnowie",
 ]
 
 
@@ -82,9 +89,10 @@ def check_page(page: Path) -> list[str]:
             errors.append(f"{page.name}: brakuje sekcji: {', '.join(sorted(missing_ids))}")
         for fragment in FORBIDDEN_HOME_FRAGMENTS:
             if fragment in content:
-                errors.append(f"{page.name}: znaleziono niepożądany element prezentacyjny: {fragment}")
-        if 'id="map-scroll"' not in content:
-            errors.append("index.html: brakuje przewijanego widoku mapy na telefonie")
+                errors.append(f"{page.name}: znaleziono niepożądany element: {fragment}")
+        for fragment in REQUIRED_HOME_FRAGMENTS:
+            if fragment not in content:
+                errors.append(f"{page.name}: brakuje wymaganego elementu: {fragment}")
 
     lowered = content.lower()
     for phrase in FORBIDDEN_TEXT:
@@ -117,6 +125,8 @@ def main() -> None:
     app_js = (ROOT / "assets/js/app.js").read_text(encoding="utf-8")
     if "editorial.css" in app_js:
         errors.append("assets/js/app.js: nadal ładuje stary arkusz editorial.css")
+    if "mapScroll" in app_js or "map-scroll" in app_js:
+        errors.append("assets/js/app.js: nadal zawiera obsługę przewijanej mapy")
 
     if errors:
         print("Kontrola strony zakończona błędami:")
