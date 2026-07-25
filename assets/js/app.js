@@ -1,3 +1,8 @@
+const editorialStyles = document.createElement('link');
+editorialStyles.rel = 'stylesheet';
+editorialStyles.href = 'assets/css/editorial.css?v=1';
+document.head.append(editorialStyles);
+
 const menu = document.querySelector('#menu');
 const nav = document.querySelector('#nav');
 
