@@ -8,15 +8,28 @@ ROOT = Path(__file__).resolve().parents[1]
 HTML_FILES = [ROOT / "index.html", ROOT / "historia-sprawy.html"]
 REQUIRED_FILES = [
     ROOT / "assets/img/osiedle-miedzy-drogami-4k.webp",
+    ROOT / "assets/img/osiedle-miedzy-drogami-4k.jpg",
     ROOT / "assets/img/brak-panelu-przy-osiedlu-4k.webp",
+    ROOT / "assets/img/brak-panelu-przy-osiedlu-4k.jpg",
     ROOT / "assets/img/mapa-osiedle-park-lwowska-4k.webp",
+    ROOT / "assets/img/mapa-osiedle-park-lwowska-4k.jpg",
+    ROOT / "assets/img/wizualizacja-parku-handlowego-lwowska-redkom.jpg",
     ROOT / "documents/petycja-osiedle-nauczycielskie-wersja-publiczna.pdf",
 ]
+REQUIRED_HOME_IDS = {"top", "miejsce", "historia", "teraz", "dalej", "dokumenty"}
 FORBIDDEN_TEXT = [
     "chcemy znaleźć pieniądze",
     "planowanego panelu o długości około 296 metrów nie ma na tym odcinku",
     "maksymalnymi normami obowiązującymi wtedy",
     "counterapi.dev",
+    "brakuje tylko jednego elementu",
+    "standard tej sprawy",
+    "nie brakuje dokumentów",
+]
+FORBIDDEN_HOME_FRAGMENTS = [
+    "snapshot-grid",
+    "journey-step",
+    "czerwone kółko",
 ]
 
 
@@ -24,13 +37,16 @@ class PageParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
         self.h1_count = 0
+        self.ids: set[str] = set()
         self.local_refs: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = dict(attrs)
         if tag == "h1":
             self.h1_count += 1
-        values = dict(attrs)
-        for attr in ("href", "src"):
+        if values.get("id"):
+            self.ids.add(values["id"] or "")
+        for attr in ("href", "src", "srcset"):
             value = values.get(attr)
             if value:
                 self.local_refs.append(value)
@@ -44,7 +60,8 @@ def is_local_reference(value: str) -> bool:
 
 
 def resolve_local_reference(page: Path, value: str) -> Path:
-    path = value.split("#", 1)[0].split("?", 1)[0]
+    path = value.split(",", 1)[0].strip().split(" ", 1)[0]
+    path = path.split("#", 1)[0].split("?", 1)[0]
     return (page.parent / path).resolve()
 
 
@@ -56,6 +73,14 @@ def check_page(page: Path) -> list[str]:
 
     if parser.h1_count != 1:
         errors.append(f"{page.name}: oczekiwano jednego H1, znaleziono {parser.h1_count}")
+
+    if page.name == "index.html":
+        missing_ids = REQUIRED_HOME_IDS - parser.ids
+        if missing_ids:
+            errors.append(f"{page.name}: brakuje sekcji: {', '.join(sorted(missing_ids))}")
+        for fragment in FORBIDDEN_HOME_FRAGMENTS:
+            if fragment in content:
+                errors.append(f"{page.name}: znaleziono niepożądany element prezentacyjny: {fragment}")
 
     lowered = content.lower()
     for phrase in FORBIDDEN_TEXT:
