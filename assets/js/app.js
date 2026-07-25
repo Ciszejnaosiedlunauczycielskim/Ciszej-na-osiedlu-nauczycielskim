@@ -30,21 +30,5 @@ if (menu && nav) {
   });
 }
 
-const mapScroll = document.querySelector('#map-scroll');
-
-function focusMapOnEstate() {
-  if (!mapScroll || window.innerWidth > 700) return;
-  mapScroll.scrollLeft = mapScroll.scrollWidth - mapScroll.clientWidth;
-}
-
-if (mapScroll) {
-  const mapImage = mapScroll.querySelector('img');
-  if (mapImage?.complete) {
-    requestAnimationFrame(focusMapOnEstate);
-  } else {
-    mapImage?.addEventListener('load', focusMapOnEstate, { once: true });
-  }
-}
-
 const year = document.querySelector('#year');
 if (year) year.textContent = new Date().getFullYear();
