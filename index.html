@@ -22,7 +22,7 @@
   <meta name="twitter:image" content="https://ciszejnaosiedlunauczycielskim.pl/assets/img/osiedle-miedzy-drogami-4k.jpg">
   <link rel="icon" href="assets/img/favicon.svg">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="assets/css/style.css?v=60">
+  <link rel="stylesheet" href="assets/css/style.css?v=61">
 </head>
 <body>
   <a class="skip" href="#main">Przejdź do treści</a>
@@ -82,20 +82,34 @@
         <div class="intro narrow-intro">
           <p class="eyebrow">Mapa lokalizacyjna</p>
           <h2 id="map-title">Gdzie dokładnie leży osiedle</h2>
-          <p>Mapa pokazuje osiedle pomiędzy obiema drogami oraz położenie Parku Handlowego Lwowska. To mapa miejsca, nie mapa poziomu hałasu.</p>
+          <p>Mapa pokazuje położenie osiedla pomiędzy DK94 i ul. Lwowską oraz teren Parku Handlowego Lwowska. To mapa lokalizacyjna, nie mapa poziomu hałasu.</p>
         </div>
-        <figure class="map-figure">
-          <div class="map-viewport" id="map-scroll" tabindex="0" aria-label="Przewijana mapa lokalizacyjna. Na telefonie przesuń mapę w bok, aby zobaczyć całość.">
-            <picture>
-              <source srcset="assets/img/mapa-osiedle-park-lwowska-4k.webp" type="image/webp">
-              <img src="assets/img/mapa-osiedle-park-lwowska-4k.jpg" alt="Mapa Tarnowa z zaznaczonym Osiedlem Nauczycielskim pomiędzy DK94 i ulicą Lwowską oraz Parkiem Handlowym Lwowska" width="3840" height="2160" loading="lazy" decoding="async">
-            </picture>
-          </div>
-          <figcaption>
-            <span>Na telefonie mapę można przesuwać. Widok startuje od powiększenia osiedla.</span>
-            <a href="assets/img/mapa-osiedle-park-lwowska-4k.jpg" target="_blank" rel="noopener noreferrer">Otwórz pełny rozmiar</a>
-          </figcaption>
-        </figure>
+
+        <div class="map-layout">
+          <figure class="map-panel map-overview">
+            <a href="assets/img/mapa-osiedle-park-lwowska-4k.jpg" target="_blank" rel="noopener noreferrer" aria-label="Otwórz pełną mapę lokalizacyjną">
+              <picture>
+                <source srcset="assets/img/mapa-osiedla-nauczycielskiego-tarnow-nowa.avif" type="image/avif">
+                <source srcset="assets/img/mapa-osiedle-park-lwowska-4k.webp" type="image/webp">
+                <img src="assets/img/mapa-osiedle-park-lwowska-4k.jpg" alt="Mapa Tarnowa z zaznaczonym Osiedlem Nauczycielskim pomiędzy DK94 i ulicą Lwowską oraz Parkiem Handlowym Lwowska" width="3840" height="2160" loading="lazy" decoding="async">
+              </picture>
+            </a>
+            <figcaption>Położenie osiedla we wschodniej części Tarnowa.</figcaption>
+          </figure>
+
+          <figure class="map-panel map-detail">
+            <div class="map-detail-crop" aria-hidden="true">
+              <picture>
+                <source srcset="assets/img/mapa-osiedla-nauczycielskiego-tarnow-nowa.avif" type="image/avif">
+                <source srcset="assets/img/mapa-osiedle-park-lwowska-4k.webp" type="image/webp">
+                <img src="assets/img/mapa-osiedle-park-lwowska-4k.jpg" alt="" width="3840" height="2160" loading="lazy" decoding="async">
+              </picture>
+            </div>
+            <figcaption>Powiększenie: osiedle, obie drogi i Park Handlowy Lwowska.</figcaption>
+          </figure>
+        </div>
+
+        <p class="map-note">Planowana jednostka wojskowa nie została zaznaczona na mapie, ponieważ jej dokładnej lokalizacji nie podano publicznie. <a href="assets/img/mapa-osiedle-park-lwowska-4k.jpg" target="_blank" rel="noopener noreferrer">Otwórz mapę w pełnym rozmiarze</a>.</p>
       </div>
     </section>
 
@@ -167,8 +181,9 @@
           <h2>Wokół osiedla pojawiają się kolejne zmiany</h2>
           <p><strong>Rozbudowa ul. Lwowskiej</strong> może zmienić układ ruchu i sposób przejazdu przez tę część miasta.</p>
           <p><strong>Park Handlowy Lwowska</strong> może zmienić liczbę samochodów, godziny największego ruchu i wybierane trasy.</p>
-          <p>Nie przesądzamy, że hałas wzrośnie. Właśnie dlatego zamiast zgadywać trzeba wykonać pomiar przed ustabilizowaniem się nowych warunków i powtórzyć go później.</p>
-          <p class="source-links"><a href="https://zdik.tarnow.pl/rozbudowa-ul-lwowskiej/" target="_blank" rel="noopener noreferrer">Rozbudowa ul. Lwowskiej — ZDiK</a><a href="https://redkomdevelopment.com/retail/tarnow/" target="_blank" rel="noopener noreferrer">Park Handlowy Lwowska — Redkom</a></p>
+          <p><strong>Planowana jednostka wojskowa w Tarnowie</strong> to kolejna inwestycja, która może wpłynąć na ruch. Miasto wskazało około 8 hektarów pod jej budowę, ale dokładna lokalizacja nie została publicznie ujawniona. Dlatego na tym etapie nie przypisujemy jej wpływu na osiedle — po potwierdzeniu lokalizacji trzeba sprawdzić, czy zmieni ruch w tej części miasta.</p>
+          <p>Żadna z tych inwestycji sama w sobie nie przesądza wzrostu hałasu. Pokazują jednak, dlaczego warto mieć rzetelny punkt odniesienia i później porównać rzeczywistą sytuację.</p>
+          <p class="source-links"><a href="https://zdik.tarnow.pl/rozbudowa-ul-lwowskiej/" target="_blank" rel="noopener noreferrer">Rozbudowa ul. Lwowskiej — ZDiK</a><a href="https://redkomdevelopment.com/retail/tarnow/" target="_blank" rel="noopener noreferrer">Park Handlowy Lwowska — Redkom</a><a href="https://rdn.pl/403992/nowa-jednostka-wojskowa-ma-powstac-w-tarnowie-prezydent-to-istotny-element-prorozwojowy-dla-miasta/" target="_blank" rel="noopener noreferrer">Planowana jednostka wojskowa — publiczne zapowiedzi</a></p>
         </div>
         <figure class="context-photo">
           <img src="assets/img/wizualizacja-parku-handlowego-lwowska-redkom.jpg" alt="Wizualizacja Parku Handlowego w Tarnowie przygotowana przez Redkom Development" width="1600" height="900" loading="lazy" decoding="async">
@@ -225,6 +240,6 @@
     </div>
   </footer>
 
-  <script src="assets/js/app.js?v=30" defer></script>
+  <script src="assets/js/app.js?v=31" defer></script>
 </body>
 </html>
