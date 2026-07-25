@@ -42,26 +42,26 @@ jobs:
         run: |
           set -euo pipefail
 
-          magick assets/img/IMG_5375.jpeg \
+          convert assets/img/IMG_5375.jpeg \
             -filter Lanczos -resize 3840x2160! -strip -quality 88 \
             assets/img/osiedle-miedzy-drogami-4k.webp
-          magick assets/img/IMG_5375.jpeg \
+          convert assets/img/IMG_5375.jpeg \
             -filter Lanczos -resize 3840x2160! -strip -quality 92 \
             assets/img/osiedle-miedzy-drogami-4k.jpg
 
           avifdec assets/img/mapa-osiedla-nauczycielskiego-tarnow-nowa.avif /tmp/mapa.png
-          magick /tmp/mapa.png \
+          convert /tmp/mapa.png \
             -filter Lanczos -resize 3840x2160! -strip -quality 92 \
             assets/img/mapa-osiedle-park-lwowska-4k.webp
-          magick /tmp/mapa.png \
+          convert /tmp/mapa.png \
             -filter Lanczos -resize 3840x2160! -strip -quality 94 \
             assets/img/mapa-osiedle-park-lwowska-4k.jpg
 
           avifdec assets/img/brak-paneli-akustycznych-przy-obwodnicy.avif /tmp/panel.png
-          magick /tmp/panel.png \
+          convert /tmp/panel.png \
             -filter Lanczos -resize 3840x2160! -strip -quality 88 \
             assets/img/brak-panelu-przy-osiedlu-4k.webp
-          magick /tmp/panel.png \
+          convert /tmp/panel.png \
             -filter Lanczos -resize 3840x2160! -strip -quality 92 \
             assets/img/brak-panelu-przy-osiedlu-4k.jpg
 
