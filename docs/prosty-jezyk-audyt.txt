@@ -1,0 +1,1 @@
+Kontrola redakcyjna wykonana automatycznie: usunięto niewyjaśnione skróty i symbole, rozwinięto znaczenie dB, DK94, DK73, mapy hałasu, pomiaru przy domach oraz propozycji panelu oznaczonej w dokumentacji jako E.6. Plik techniczny nie jest wyświetlany na stronie.
