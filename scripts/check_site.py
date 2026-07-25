@@ -16,7 +16,7 @@ REQUIRED_FILES = [
     ROOT / "assets/img/wizualizacja-parku-handlowego-lwowska-redkom.jpg",
     ROOT / "documents/petycja-osiedle-nauczycielskie-wersja-publiczna.pdf",
 ]
-REQUIRED_HOME_IDS = {"top", "miejsce", "historia", "teraz", "dalej", "dokumenty"}
+REQUIRED_HOME_IDS = {"top", "miejsce", "mapa", "historia", "teraz", "dalej", "dokumenty"}
 FORBIDDEN_TEXT = [
     "chcemy znaleźć pieniądze",
     "planowanego panelu o długości około 296 metrów nie ma na tym odcinku",
@@ -25,11 +25,13 @@ FORBIDDEN_TEXT = [
     "brakuje tylko jednego elementu",
     "standard tej sprawy",
     "nie brakuje dokumentów",
+    "zebrane dokumenty pozwalają odtworzyć historię",
+    "nie zaczyna się od petycji",
 ]
 FORBIDDEN_HOME_FRAGMENTS = [
     "snapshot-grid",
     "journey-step",
-    "czerwone kółko",
+    "editorialStyles",
 ]
 
 
@@ -81,6 +83,8 @@ def check_page(page: Path) -> list[str]:
         for fragment in FORBIDDEN_HOME_FRAGMENTS:
             if fragment in content:
                 errors.append(f"{page.name}: znaleziono niepożądany element prezentacyjny: {fragment}")
+        if 'id="map-scroll"' not in content:
+            errors.append("index.html: brakuje przewijanego widoku mapy na telefonie")
 
     lowered = content.lower()
     for phrase in FORBIDDEN_TEXT:
@@ -109,6 +113,10 @@ def main() -> None:
             errors.append(f"Brak strony: {page.relative_to(ROOT)}")
             continue
         errors.extend(check_page(page))
+
+    app_js = (ROOT / "assets/js/app.js").read_text(encoding="utf-8")
+    if "editorial.css" in app_js:
+        errors.append("assets/js/app.js: nadal ładuje stary arkusz editorial.css")
 
     if errors:
         print("Kontrola strony zakończona błędami:")

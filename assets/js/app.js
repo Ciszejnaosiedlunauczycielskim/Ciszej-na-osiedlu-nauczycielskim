@@ -1,8 +1,3 @@
-const editorialStyles = document.createElement('link');
-editorialStyles.rel = 'stylesheet';
-editorialStyles.href = 'assets/css/editorial.css?v=1';
-document.head.append(editorialStyles);
-
 const menu = document.querySelector('#menu');
 const nav = document.querySelector('#nav');
 
@@ -31,8 +26,24 @@ if (menu && nav) {
   });
 
   window.addEventListener('resize', () => {
-    if (window.innerWidth > 900 && nav.classList.contains('open')) closeMenu();
+    if (window.innerWidth > 980 && nav.classList.contains('open')) closeMenu();
   });
+}
+
+const mapScroll = document.querySelector('#map-scroll');
+
+function focusMapOnEstate() {
+  if (!mapScroll || window.innerWidth > 700) return;
+  mapScroll.scrollLeft = mapScroll.scrollWidth - mapScroll.clientWidth;
+}
+
+if (mapScroll) {
+  const mapImage = mapScroll.querySelector('img');
+  if (mapImage?.complete) {
+    requestAnimationFrame(focusMapOnEstate);
+  } else {
+    mapImage?.addEventListener('load', focusMapOnEstate, { once: true });
+  }
 }
 
 const year = document.querySelector('#year');
