@@ -9,12 +9,21 @@ on:
       - assets/img/IMG_5375.jpeg
       - assets/img/mapa-osiedla-nauczycielskiego-tarnow-nowa.avif
       - assets/img/brak-paneli-akustycznych-przy-obwodnicy.avif
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/build-4k-assets.yml
+      - assets/img/IMG_5375.jpeg
+      - assets/img/mapa-osiedla-nauczycielskiego-tarnow-nowa.avif
+      - assets/img/brak-paneli-akustycznych-przy-obwodnicy.avif
 
 permissions:
   contents: write
 
 jobs:
   build-assets:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Pobierz repozytorium
