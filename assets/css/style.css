@@ -59,17 +59,18 @@ p{margin-top:0}
 .btn.secondary:hover{border-color:var(--ink);background:#fafafa}
 
 .place{background:#fff}
-.feature-photo,.inline-photo,.context-photo,.map-figure{margin:0}
+.feature-photo,.inline-photo,.context-photo,.map-panel{margin:0}
 .feature-photo img,.inline-photo img,.context-photo img{width:100%;height:auto;border-radius:.85rem}
-.feature-photo figcaption,.inline-photo figcaption,.context-photo figcaption,.map-figure figcaption{padding:.65rem .1rem 0;color:var(--muted);font-size:.86rem}
+.feature-photo figcaption,.inline-photo figcaption,.context-photo figcaption,.map-panel figcaption{padding:.65rem .1rem 0;color:var(--muted);font-size:.86rem}
 
 .map-section{background:var(--soft)}
-.map-figure{overflow:hidden;border:1px solid var(--line);border-radius:.9rem;background:#fff}
-.map-viewport{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#9aa6ac #eef1f1}
-.map-viewport picture{display:block}
-.map-viewport img{width:100%;height:auto;max-width:none;background:#edf1ed}
-.map-figure figcaption{display:flex;justify-content:space-between;gap:1rem;padding:.8rem .95rem .95rem}
-.map-figure figcaption a{color:var(--red);font-weight:780;text-decoration:none}
+.map-layout{display:grid;gap:1rem}
+.map-panel{padding:.55rem;border:1px solid var(--line);border-radius:.9rem;background:#fff}
+.map-panel a{display:block;border-radius:.6rem}
+.map-panel img{width:100%;height:auto;border-radius:.55rem;background:#edf1ed}
+.map-detail{display:none}
+.map-note{margin:1rem 0 0;color:var(--muted);font-size:.9rem}
+.map-note a{color:var(--red);font-weight:780;text-underline-offset:.2em}
 
 .story{background:var(--warm)}
 .story-wrap{max-width:1060px}
@@ -132,7 +133,7 @@ footer{background:#0b171d;color:#b7c2c7}
 .event-source{margin-top:.75rem!important;font-size:.88rem}
 .back-link{font-weight:760;text-decoration:none}
 
-.btn:focus-visible,.map-viewport:focus-visible,nav a:focus-visible,.back-link:focus-visible,.text-link:focus-visible,.source-links a:focus-visible,#menu:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.btn:focus-visible,.map-panel a:focus-visible,nav a:focus-visible,.back-link:focus-visible,.text-link:focus-visible,.source-links a:focus-visible,#menu:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
 
 @media(max-width:980px){
   nav{display:none}
@@ -162,9 +163,14 @@ footer{background:#0b171d;color:#b7c2c7}
   .actions{flex-direction:column}
   .actions .btn,.contact .btn{width:100%}
   .feature-photo img{border-radius:.55rem}
-  .map-figure{border-radius:.7rem}
-  .map-viewport img{width:1080px;min-width:1080px;height:auto}
-  .map-figure figcaption{flex-direction:column;gap:.35rem;font-size:.82rem}
+  .map-layout{gap:.8rem}
+  .map-panel{padding:.42rem;border-radius:.72rem}
+  .map-overview figcaption::after{content:" Pełny układ miasta i powiększenie osiedla pokazujemy osobno poniżej."}
+  .map-detail{display:block}
+  .map-detail-crop{position:relative;overflow:hidden;aspect-ratio:4/3;border-radius:.5rem;background:#edf1ed}
+  .map-detail-crop picture{display:block;height:100%}
+  .map-detail-crop img{position:absolute;right:0;bottom:0;width:205%;max-width:none;height:auto;border-radius:0}
+  .map-note{font-size:.84rem}
   .chapter{grid-template-columns:1fr;gap:.55rem;padding:1.55rem 0}
   .chapter-label{padding-top:0}
   .numbers-line{display:grid;grid-template-columns:1fr;gap:.35rem}
