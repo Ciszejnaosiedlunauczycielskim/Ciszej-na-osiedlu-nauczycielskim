@@ -1,0 +1,42 @@
+name: CounterAPI diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check CounterAPI responses and CORS
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie'
+          ORIGIN='https://ciszejnaosiedlunauczycielskim.pl'
+
+          request() {
+            local label="$1"
+            local url="$2"
+            echo "===== ${label} ====="
+            curl --silent --show-error --location \
+              --connect-timeout 15 --max-time 30 \
+              --header "Origin: ${ORIGIN}" \
+              --header 'Accept: application/json' \
+              --dump-header headers.txt \
+              --output body.txt \
+              --write-out 'HTTP_STATUS=%{http_code}\nCONTENT_TYPE=%{content_type}\nREMOTE_IP=%{remote_ip}\n' \
+              "$url"
+            echo '----- HEADERS -----'
+            cat headers.txt
+            echo '----- BODY -----'
+            cat body.txt
+            echo
+          }
+
+          request 'GET BEFORE' "$BASE"
+          request 'UP' "$BASE/up"
+          request 'GET AFTER' "$BASE"
