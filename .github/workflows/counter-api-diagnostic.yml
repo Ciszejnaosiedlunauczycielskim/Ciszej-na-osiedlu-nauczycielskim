@@ -21,22 +21,22 @@ jobs:
           request() {
             local label="$1"
             local url="$2"
-            echo "===== ${label} ====="
-            curl --silent --show-error --location \
+            local status
+            status=$(curl --silent --show-error --location \
               --connect-timeout 15 --max-time 30 \
               --header "Origin: ${ORIGIN}" \
               --header 'Accept: application/json' \
               --dump-header headers.txt \
               --output body.txt \
-              --write-out 'HTTP_STATUS=%{http_code}\nCONTENT_TYPE=%{content_type}\nREMOTE_IP=%{remote_ip}\n' \
-              "$url"
-            echo '----- HEADERS -----'
-            cat headers.txt
-            echo '----- BODY -----'
-            cat body.txt
-            echo
+              --write-out '%{http_code}' \
+              "$url")
+            echo "${label}_HTTP=${status}"
+            echo "${label}_CORS=$(awk 'BEGIN{IGNORECASE=1} /^access-control-allow-origin:/ {gsub(/\r/,""); print $2}' headers.txt | tail -1)"
+            echo "${label}_LIMIT=$(awk 'BEGIN{IGNORECASE=1} /^x-ratelimit-limit:/ {gsub(/\r/,""); print $2}' headers.txt | tail -1)"
+            echo "${label}_REMAINING=$(awk 'BEGIN{IGNORECASE=1} /^x-ratelimit-remaining:/ {gsub(/\r/,""); print $2}' headers.txt | tail -1)"
+            echo "${label}_BODY=$(cat body.txt)"
           }
 
-          request 'GET BEFORE' "$BASE"
+          request 'GET_BEFORE' "$BASE"
           request 'UP' "$BASE/up"
-          request 'GET AFTER' "$BASE"
+          request 'GET_AFTER' "$BASE"
