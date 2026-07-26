@@ -1,0 +1,22 @@
+name = "ciszej-support-api"
+main = "src/index.js"
+compatibility_date = "2026-07-26"
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGIN = "https://ciszejnaosiedlunauczycielskim.pl"
+GITHUB_PAGES_ORIGIN = "https://ciszejnaosiedlunauczycielskim.github.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ciszej-support"
+database_id = "WSTAW_ID_BAZY_D1"
+migrations_dir = "migrations"
+
+[[ratelimits]]
+name = "SUPPORT_RATE_LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 5
+  period = 60
