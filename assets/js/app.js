@@ -42,34 +42,36 @@ const supportCounter = document.querySelector('.support-counter');
 const SUPPORT_API = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie/';
 const SUPPORT_STORAGE_KEY = 'ciszej-wsparcie-zapisane-v1';
 const SUPPORT_COOKIE_NAME = 'ciszej_wsparcie_zapisane';
-const SUPPORT_CACHE_KEY = 'ciszej-wsparcie-licznik-v2';
-const SUPPORT_PENDING_KEY = 'ciszej-wsparcie-oczekuje-v1';
-const SUPPORT_LOCK_KEY = 'ciszej-wsparcie-blokada-v1';
+const SUPPORT_CACHE_KEY = 'ciszej-wsparcie-licznik-v3';
+const SUPPORT_PENDING_KEY = 'ciszej-wsparcie-oczekuje-v2';
+const SUPPORT_LOCK_KEY = 'ciszej-wsparcie-blokada-v2';
 const SUPPORT_TIMEOUT_MS = 10000;
 const SUPPORT_CACHE_MAX_AGE_MS = 60000;
 const SUPPORT_LOCK_MAX_AGE_MS = 20000;
-const SUPPORT_RETRY_DELAY_MS = 30000;
+const SUPPORT_READ_RETRY_DELAY_MS = 30000;
 
 let counterRequest = null;
-let refreshTimer = null;
-let pendingSubmitTimer = null;
+let readRetryTimer = null;
 let supportChannel = null;
 
 try {
   if ('BroadcastChannel' in window) {
-    supportChannel = new BroadcastChannel('ciszej-wsparcie-v1');
+    supportChannel = new BroadcastChannel('ciszej-wsparcie-v2');
   }
 } catch (error) {
-  console.warn('[LICZNIK] WARNING: BroadcastChannel niedostępny.', error);
+  console.warn('[LICZNIK] BroadcastChannel niedostępny.', error);
 }
 
 function logCounter(stage, details = {}) {
-  const method = stage === 'ERROR' || stage === 'FINAL FAILURE' ? 'error' :
-    stage === 'WARNING' ? 'warn' : 'info';
+  const method = stage === 'ERROR' || stage === 'FINAL FAILURE'
+    ? 'error'
+    : stage === 'WARNING'
+      ? 'warn'
+      : 'info';
   console[method](`[LICZNIK] ${stage}`, details);
 }
 
-function safeStorageGet(key) {
+function storageGet(key) {
   try {
     return localStorage.getItem(key);
   } catch (error) {
@@ -78,7 +80,7 @@ function safeStorageGet(key) {
   }
 }
 
-function safeStorageSet(key, value) {
+function storageSet(key, value) {
   try {
     localStorage.setItem(key, value);
     return true;
@@ -88,7 +90,7 @@ function safeStorageSet(key, value) {
   }
 }
 
-function safeStorageRemove(key) {
+function storageRemove(key) {
   try {
     localStorage.removeItem(key);
   } catch (error) {
@@ -97,7 +99,7 @@ function safeStorageRemove(key) {
 }
 
 function readStoredSupport() {
-  if (safeStorageGet(SUPPORT_STORAGE_KEY) === '1') return true;
+  if (storageGet(SUPPORT_STORAGE_KEY) === '1') return true;
 
   try {
     return document.cookie
@@ -110,8 +112,8 @@ function readStoredSupport() {
 }
 
 function storeSupport() {
-  safeStorageSet(SUPPORT_STORAGE_KEY, '1');
-  safeStorageRemove(SUPPORT_PENDING_KEY);
+  storageSet(SUPPORT_STORAGE_KEY, '1');
+  storageRemove(SUPPORT_PENDING_KEY);
 
   try {
     document.cookie = `${SUPPORT_COOKIE_NAME}=1; Max-Age=315360000; Path=/; SameSite=Lax; Secure`;
@@ -120,8 +122,20 @@ function storeSupport() {
   }
 }
 
+function readPendingSupport() {
+  return storageGet(SUPPORT_PENDING_KEY);
+}
+
+function queueOfflineSupport() {
+  storageSet(SUPPORT_PENDING_KEY, 'offline');
+}
+
+function clearPendingSupport() {
+  storageRemove(SUPPORT_PENDING_KEY);
+}
+
 function readCachedCounter() {
-  const raw = safeStorageGet(SUPPORT_CACHE_KEY);
+  const raw = storageGet(SUPPORT_CACHE_KEY);
   if (!raw) return null;
 
   try {
@@ -142,7 +156,7 @@ function readCachedCounter() {
 
 function storeCachedCounter(value) {
   const cached = { value, updatedAt: Date.now() };
-  safeStorageSet(SUPPORT_CACHE_KEY, JSON.stringify(cached));
+  storageSet(SUPPORT_CACHE_KEY, JSON.stringify(cached));
   supportChannel?.postMessage({ type: 'counter', ...cached });
 }
 
@@ -176,24 +190,24 @@ function getSupportLabel(value) {
 
 function renderCount(value) {
   if (!supportCount || !supportLabel || value === null) return;
+
   const formatted = new Intl.NumberFormat('pl-PL').format(value);
   const label = getSupportLabel(value);
+
   supportCount.textContent = formatted;
   supportCount.setAttribute('aria-label', `${formatted} ${label}`);
   supportLabel.textContent = label;
   supportCounter?.setAttribute('aria-label', `${formatted} ${label}`);
-  logCounter('DOM UPDATE', { value });
 }
 
-function renderCounterLoading() {
+function renderLoading() {
   if (!supportCount || readCachedCounter()) return;
   supportCount.textContent = '…';
   supportCount.setAttribute('aria-label', 'Pobieranie aktualnej liczby osób wspierających');
   if (supportLabel) supportLabel.textContent = 'pobieranie aktualnej liczby';
-  supportCounter?.setAttribute('aria-label', 'Pobieranie aktualnej liczby osób wspierających');
 }
 
-function renderCounterUnavailable() {
+function renderUnavailable() {
   const cached = readCachedCounter();
   if (cached) {
     renderCount(cached.value);
@@ -201,7 +215,6 @@ function renderCounterUnavailable() {
   }
 
   if (supportCount) supportCount.textContent = '—';
-  if (supportCount) supportCount.setAttribute('aria-label', 'Aktualizacja licznika chwilowo niedostępna');
   if (supportLabel) supportLabel.textContent = 'licznik chwilowo się aktualizuje';
   supportCounter?.setAttribute('aria-label', 'Aktualizacja licznika chwilowo niedostępna');
 }
@@ -213,39 +226,20 @@ function renderSupportedState(message = 'Wsparcie z tego urządzenia zostało ju
   if (supportStatus) supportStatus.textContent = message;
 }
 
-function setPendingSupport(value) {
-  if (value) {
-    safeStorageSet(SUPPORT_PENDING_KEY, '1');
-  } else {
-    safeStorageRemove(SUPPORT_PENDING_KEY);
-  }
-}
-
-function hasPendingSupport() {
-  return safeStorageGet(SUPPORT_PENDING_KEY) === '1';
-}
-
 function acquireSubmitLock() {
   const now = Date.now();
-  const existing = Number(safeStorageGet(SUPPORT_LOCK_KEY));
+  const existing = Number(storageGet(SUPPORT_LOCK_KEY));
 
   if (Number.isFinite(existing) && now - existing < SUPPORT_LOCK_MAX_AGE_MS) {
     return false;
   }
 
-  safeStorageSet(SUPPORT_LOCK_KEY, String(now));
+  storageSet(SUPPORT_LOCK_KEY, String(now));
   return true;
 }
 
 function releaseSubmitLock() {
-  safeStorageRemove(SUPPORT_LOCK_KEY);
-}
-
-function scheduleCounterRefresh(delay = SUPPORT_RETRY_DELAY_MS) {
-  window.clearTimeout(refreshTimer);
-  refreshTimer = window.setTimeout(() => {
-    loadSupportCount({ force: true });
-  }, delay);
+  storageRemove(SUPPORT_LOCK_KEY);
 }
 
 async function requestCounter(path = '') {
@@ -268,29 +262,29 @@ async function requestCounter(path = '') {
     });
 
     const body = await response.text();
-    logCounter('API RESPONSE', {
-      endpoint,
-      status: response.status,
-      ok: response.ok
-    });
+    logCounter('API RESPONSE', { endpoint, status: response.status, ok: response.ok });
 
     if (!response.ok) {
       const error = new Error(`Błąd licznika: ${response.status}${body ? ` — ${body.slice(0, 160)}` : ''}`);
       error.status = response.status;
-      error.retryAfter = Number(response.headers.get('Retry-After')) || null;
       throw error;
     }
 
     try {
-      const payload = JSON.parse(body);
-      logCounter('PARSE', { endpoint, success: true });
-      return payload;
+      return JSON.parse(body);
     } catch (error) {
-      throw new Error('Licznik zwrócił nieprawidłową odpowiedź JSON.', { cause: error });
+      throw new Error('Licznik zwrócił nieprawidłową odpowiedź JSON.');
     }
   } finally {
     window.clearTimeout(timeoutId);
   }
+}
+
+function scheduleReadRetry() {
+  window.clearTimeout(readRetryTimer);
+  readRetryTimer = window.setTimeout(() => {
+    loadSupportCount({ force: true });
+  }, SUPPORT_READ_RETRY_DELAY_MS);
 }
 
 async function loadSupportCount({ force = false } = {}) {
@@ -298,22 +292,19 @@ async function loadSupportCount({ force = false } = {}) {
 
   const cached = readCachedCounter();
   if (cached) renderCount(cached.value);
+
   if (!force && cached && Date.now() - cached.updatedAt < SUPPORT_CACHE_MAX_AGE_MS) {
-    logCounter('CACHE', { hit: true, ageMs: Date.now() - cached.updatedAt });
     return;
   }
 
   if (!navigator.onLine) {
-    logCounter('WARNING', { place: 'loadSupportCount', reason: 'offline' });
-    renderCounterUnavailable();
+    renderUnavailable();
     return;
   }
 
   if (counterRequest) return counterRequest;
 
-  renderCounterLoading();
-  logCounter('START', { operation: 'load' });
-
+  renderLoading();
   counterRequest = (async () => {
     try {
       const payload = await requestCounter();
@@ -324,17 +315,12 @@ async function loadSupportCount({ force = false } = {}) {
       renderCount(value);
       logCounter('FINAL SUCCESS', { operation: 'load', value });
     } catch (error) {
-      renderCounterUnavailable();
-      const retryDelay = error?.status === 429 && error?.retryAfter
-        ? Math.max(SUPPORT_RETRY_DELAY_MS, error.retryAfter * 1000)
-        : SUPPORT_RETRY_DELAY_MS;
-      scheduleCounterRefresh(retryDelay);
+      renderUnavailable();
+      scheduleReadRetry();
       logCounter('FINAL FAILURE', {
         operation: 'load',
-        place: 'loadSupportCount',
         reason: error?.message,
-        stack: error?.stack,
-        possibleImpact: 'Nie udało się odświeżyć globalnej liczby. Wyświetlana jest ostatnia zapisana wartość.'
+        stack: error?.stack
       });
     } finally {
       counterRequest = null;
@@ -344,7 +330,7 @@ async function loadSupportCount({ force = false } = {}) {
   return counterRequest;
 }
 
-async function submitSupport({ fromPending = false } = {}) {
+async function submitSupport({ fromOfflineQueue = false } = {}) {
   if (!supportButton) return;
 
   if (readStoredSupport()) {
@@ -353,13 +339,12 @@ async function submitSupport({ fromPending = false } = {}) {
   }
 
   if (!navigator.onLine) {
-    setPendingSupport(true);
+    queueOfflineSupport();
     supportButton.disabled = false;
     supportButton.textContent = 'Oczekuje na internet';
     if (supportStatus) {
-      supportStatus.textContent = 'Brak połączenia. Wsparcie zostanie wysłane automatycznie po odzyskaniu internetu.';
+      supportStatus.textContent = 'Brak połączenia. Wsparcie zostanie wysłane raz po odzyskaniu internetu.';
     }
-    logCounter('RECOVERY', { operation: 'submit', action: 'queued-offline' });
     return;
   }
 
@@ -371,12 +356,12 @@ async function submitSupport({ fromPending = false } = {}) {
   supportButton.disabled = true;
   supportButton.textContent = 'Zapisywanie…';
   if (supportStatus) supportStatus.textContent = '';
-  logCounter('START', { operation: 'submit', fromPending });
 
   try {
-    // Żądanie zwiększające licznik nie jest automatycznie ponawiane po wysłaniu,
-    // ponieważ CounterAPI v1 nie obsługuje kluczy idempotencji i ponowienie
-    // mogłoby dodać tę samą osobę drugi raz.
+    // Po wysłaniu żądania zwiększającego licznik nie wykonujemy żadnego
+    // automatycznego ponowienia. CounterAPI v1 nie obsługuje idempotencji,
+    // więc ponowienie po timeout/429/5xx mogłoby dodać tę samą osobę drugi raz.
+    clearPendingSupport();
     const payload = await requestCounter('up');
     const value = extractCounterValue(payload);
     if (value === null) throw new Error('Odpowiedź licznika nie zawiera wartości.');
@@ -386,45 +371,21 @@ async function submitSupport({ fromPending = false } = {}) {
     renderCount(value);
     renderSupportedState('Dziękujemy. Wsparcie zostało zapisane.');
     supportChannel?.postMessage({ type: 'supported', value });
-    logCounter('FINAL SUCCESS', { operation: 'submit', value });
+    logCounter('FINAL SUCCESS', { operation: 'submit', value, fromOfflineQueue });
   } catch (error) {
-    const serverRejectedRequest = error?.status === 429 || error?.status >= 500;
-
-    if (serverRejectedRequest) {
-      const retryDelay = error?.status === 429 && error?.retryAfter
-        ? Math.max(SUPPORT_RETRY_DELAY_MS, error.retryAfter * 1000)
-        : SUPPORT_RETRY_DELAY_MS;
-
-      setPendingSupport(true);
-      supportButton.disabled = false;
-      supportButton.textContent = 'Oczekuje na zapis';
-      if (supportStatus) {
-        supportStatus.textContent = 'Serwer licznika jest chwilowo zajęty. Wsparcie zostanie wysłane automatycznie.';
-      }
-
-      window.clearTimeout(pendingSubmitTimer);
-      pendingSubmitTimer = window.setTimeout(() => {
-        if (hasPendingSupport() && !readStoredSupport() && navigator.onLine) {
-          submitSupport({ fromPending: true });
-        }
-      }, retryDelay);
-    } else {
-      setPendingSupport(false);
-      supportButton.disabled = false;
-      supportButton.textContent = 'Spróbuj ponownie';
-      if (supportStatus) {
-        supportStatus.textContent = 'Nie udało się potwierdzić zapisu. Sprawdź internet i spróbuj ponownie.';
-      }
+    clearPendingSupport();
+    supportButton.disabled = false;
+    supportButton.textContent = 'Sprawdź i spróbuj ponownie';
+    if (supportStatus) {
+      supportStatus.textContent = 'Nie udało się potwierdzić zapisu. Odśwież stronę i sprawdź licznik przed ponownym kliknięciem.';
     }
 
+    window.setTimeout(() => loadSupportCount({ force: true }), 1500);
     logCounter('FINAL FAILURE', {
       operation: 'submit',
-      place: 'submitSupport',
       reason: error?.message,
       stack: error?.stack,
-      possibleImpact: serverRejectedRequest
-        ? 'Zapis został bezpiecznie odłożony do ponowienia.'
-        : 'Serwer nie potwierdził zapisu; żądanie nie jest automatycznie ponawiane, aby uniknąć podwójnego głosu.'
+      possibleImpact: 'Automatyczne ponowienie wyłączono, aby uniknąć podwójnego głosu.'
     });
   } finally {
     releaseSubmitLock();
@@ -432,32 +393,27 @@ async function submitSupport({ fromPending = false } = {}) {
 }
 
 if (supportButton && supportCount) {
-  logCounter('CONFIG', {
-    endpoint: SUPPORT_API,
-    timeoutMs: SUPPORT_TIMEOUT_MS,
-    cacheMaxAgeMs: SUPPORT_CACHE_MAX_AGE_MS
-  });
-
   const cached = readCachedCounter();
   if (cached) renderCount(cached.value);
-  else renderCounterLoading();
+  else renderLoading();
 
   if (readStoredSupport()) renderSupportedState();
+
   supportButton.addEventListener('click', () => submitSupport());
   loadSupportCount();
 
-  if (hasPendingSupport() && !readStoredSupport() && navigator.onLine) {
-    pendingSubmitTimer = window.setTimeout(() => submitSupport({ fromPending: true }), 1200);
+  if (readPendingSupport() === 'offline' && !readStoredSupport() && navigator.onLine) {
+    window.setTimeout(() => submitSupport({ fromOfflineQueue: true }), 1200);
   }
 
   window.addEventListener('online', () => {
-    logCounter('RECOVERY', { event: 'online' });
     loadSupportCount({ force: true });
-    if (hasPendingSupport() && !readStoredSupport()) submitSupport({ fromPending: true });
+    if (readPendingSupport() === 'offline' && !readStoredSupport()) {
+      submitSupport({ fromOfflineQueue: true });
+    }
   });
 
   window.addEventListener('offline', () => {
-    logCounter('WARNING', { event: 'offline' });
     if (supportStatus && !readStoredSupport()) {
       supportStatus.textContent = 'Brak połączenia z internetem.';
     }
@@ -465,8 +421,8 @@ if (supportButton && supportCount) {
 
   window.addEventListener('storage', event => {
     if (event.key === SUPPORT_CACHE_KEY && event.newValue) {
-      const cachedValue = readCachedCounter();
-      if (cachedValue) renderCount(cachedValue.value);
+      const latest = readCachedCounter();
+      if (latest) renderCount(latest.value);
     }
 
     if (event.key === SUPPORT_STORAGE_KEY && event.newValue === '1') {
