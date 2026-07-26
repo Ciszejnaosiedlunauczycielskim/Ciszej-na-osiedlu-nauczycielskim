@@ -1,0 +1,48 @@
+name: Jednorazowo dodaj status petycji
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/add-petition-status-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Dodaj informację o zbiórce podpisów
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+          old = '''        <div class="next-copy">
+          <p>Potrzebny jest program pomiarów obejmujący różne ulice osiedla, dzień i noc, natężenie ruchu oraz wpływ obu dróg osobno i łącznie.</p>'''
+          new = '''        <div class="next-copy">
+          <p><strong>Aktualnie zbieramy podpisy mieszkańców pod petycją.</strong> Po zakończeniu zbiórki petycja wraz z załączonymi dokumentami zostanie złożona do właściwych instytucji.</p>
+          <p>Potrzebny jest program pomiarów obejmujący różne ulice osiedla, dzień i noc, natężenie ruchu oraz wpływ obu dróg osobno i łącznie.</p>'''
+          if old not in text:
+              raise SystemExit('Nie znaleziono miejsca do wstawienia informacji')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+
+      - name: Sprawdź wynik i zapisz zmianę
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'Aktualnie zbieramy podpisy mieszkańców pod petycją.' index.html
+          rm .github/workflows/add-petition-status-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html .github/workflows/add-petition-status-once.yml
+          git commit -m 'Dodaj status zbiórki podpisów pod petycją'
+          git push origin HEAD:main
