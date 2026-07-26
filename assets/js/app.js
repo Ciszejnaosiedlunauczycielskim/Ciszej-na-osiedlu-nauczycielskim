@@ -52,9 +52,14 @@ function readStoredSupport() {
     console.warn('Pamięć lokalna jest niedostępna.', error);
   }
 
-  return document.cookie
-    .split('; ')
-    .some(cookie => cookie === `${SUPPORT_COOKIE_NAME}=1`);
+  try {
+    return document.cookie
+      .split('; ')
+      .some(cookie => cookie === `${SUPPORT_COOKIE_NAME}=1`);
+  } catch (error) {
+    console.warn('Pliki cookie są niedostępne.', error);
+    return false;
+  }
 }
 
 function storeSupport() {
@@ -64,7 +69,11 @@ function storeSupport() {
     console.warn('Nie udało się zapisać wsparcia w pamięci lokalnej.', error);
   }
 
-  document.cookie = `${SUPPORT_COOKIE_NAME}=1; Max-Age=315360000; Path=/; SameSite=Lax; Secure`;
+  try {
+    document.cookie = `${SUPPORT_COOKIE_NAME}=1; Max-Age=315360000; Path=/; SameSite=Lax; Secure`;
+  } catch (error) {
+    console.warn('Nie udało się zapisać pliku cookie wsparcia.', error);
+  }
 }
 
 function extractCounterValue(payload) {
