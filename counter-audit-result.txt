@@ -1,0 +1,15 @@
+OVERALL=PASS
+PASS | Składnia repozytoryjnego app.js
+PASS | HTML zawiera support-button
+PASS | HTML zawiera support-count
+PASS | HTML ładuje app.js?v=36
+PASS | Pobranie strony produkcyjnej
+PASS | Produkcja zawiera support-button
+PASS | Produkcja zawiera support-count
+PASS | Produkcja ładuje app.js?v=36
+PASS | Pobranie produkcyjnego app.js?v=36
+PASS | Produkcja ma identyczny app.js jak main
+PASS | Składnia produkcyjnego app.js
+PASS | CounterAPI HTTP 200
+PASS | CounterAPI zezwala na CORS dla strony
+PASS | CounterAPI zwraca liczbę | value=67
