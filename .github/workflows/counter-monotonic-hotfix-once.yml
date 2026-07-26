@@ -1,0 +1,59 @@
+name: Jednorazowy hotfix monotonicznego licznika
+
+on:
+  push:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch i test
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('assets/js/app.js')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace("const SUPPORT_CACHE_KEY = 'ciszej-wsparcie-licznik-v3';", "const SUPPORT_CACHE_KEY = 'ciszej-wsparcie-licznik-v4';")
+          old = """      const payload = await requestCounter();
+          const value = extractCounterValue(payload);
+          if (value === null) throw new Error('Odpowiedź licznika nie zawiera wartości.');
+
+          storeCachedCounter(value);
+          renderCount(value);
+          logCounter('FINAL SUCCESS', { operation: 'load', value });"""
+          new = """      const payload = await requestCounter();
+          const serverValue = extractCounterValue(payload);
+          if (serverValue === null) throw new Error('Odpowiedź licznika nie zawiera wartości.');
+
+          // Odczyt CounterAPI może być starszy z powodu cache. Licznik poparcia
+          // jest monotoniczny, więc nie cofamy wartości zapisanej na urządzeniu.
+          const value = cached ? Math.max(cached.value, serverValue) : serverValue;
+          storeCachedCounter(value);
+          renderCount(value);
+          logCounter('FINAL SUCCESS', { operation: 'load', value, serverValue });"""
+          if old not in s:
+              raise SystemExit('Nie znaleziono fragmentu do podmiany')
+          p.write_text(s.replace(old, new), encoding='utf-8')
+          PY
+          node --check assets/js/app.js
+          grep -q "Math.max(cached.value, serverValue)" assets/js/app.js
+          test "$(grep -o "requestCounter('up')" assets/js/app.js | wc -l)" -eq 1
+
+      - name: Commit
+        shell: bash
+        run: |
+          rm .github/workflows/counter-monotonic-hotfix-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/js/app.js .github/workflows/counter-monotonic-hotfix-once.yml
+          git commit -m "Zapobiegaj cofaniu wartości licznika przez cache"
+          git push origin HEAD:main
