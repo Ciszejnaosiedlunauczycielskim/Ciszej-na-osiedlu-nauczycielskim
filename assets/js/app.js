@@ -227,7 +227,7 @@ const shareStatus = document.querySelector('#share-status');
 if (shareButton) {
   const shareData = {
     title: 'Ciszej na Osiedlu Nauczycielskim',
-    text: 'Poznaj historię pomiarów hałasu przy Osiedlu Nauczycielskim w Tarnowie i wesprzyj inicjatywę wykonania aktualnych pomiarów oraz wdrożenia zabezpieczeń przed hałasem.',
+    text: 'Poznaj historię pomiarów hałasu przy Osiedlu Nauczycielskim w Tarnowie i poprzyj na stronie inicjatywę mieszkańców osiedla dotyczącą wykonania aktualnych pomiarów oraz wdrożenia zabezpieczeń przed hałasem.',
     url: 'https://ciszejnaosiedlunauczycielskim.pl/'
   };
 
