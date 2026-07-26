@@ -35,7 +35,9 @@ if (year) year.textContent = new Date().getFullYear();
 
 const supportButton = document.querySelector('#support-button');
 const supportCount = document.querySelector('#support-count');
+const supportLabel = document.querySelector('#support-label');
 const supportStatus = document.querySelector('#support-status');
+const supportCounter = document.querySelector('.support-counter');
 
 const SUPPORT_API = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie';
 const SUPPORT_STORAGE_KEY = 'ciszej-wsparcie-zapisane-v1';
@@ -79,9 +81,33 @@ function extractCounterValue(payload) {
   return candidate === undefined ? null : Math.max(0, Math.trunc(Number(candidate)));
 }
 
+function getSupportLabel(value) {
+  const absolute = Math.abs(value);
+  const lastDigit = absolute % 10;
+  const lastTwoDigits = absolute % 100;
+
+  if (absolute === 1) return 'osoba wspiera inicjatywę';
+  if (lastDigit >= 2 && lastDigit <= 4 && !(lastTwoDigits >= 12 && lastTwoDigits <= 14)) {
+    return 'osoby wspierają inicjatywę';
+  }
+  return 'osób wspiera inicjatywę';
+}
+
 function renderCount(value) {
-  if (!supportCount || value === null) return;
-  supportCount.textContent = new Intl.NumberFormat('pl-PL').format(value);
+  if (!supportCount || !supportLabel || value === null) return;
+  const formatted = new Intl.NumberFormat('pl-PL').format(value);
+  const label = getSupportLabel(value);
+  supportCount.textContent = formatted;
+  supportCount.setAttribute('aria-label', `${formatted} ${label}`);
+  supportLabel.textContent = label;
+  supportCounter?.setAttribute('aria-label', `${formatted} ${label}`);
+}
+
+function renderCounterUnavailable() {
+  if (supportCount) supportCount.textContent = '—';
+  if (supportCount) supportCount.setAttribute('aria-label', 'Licznik chwilowo niedostępny');
+  if (supportLabel) supportLabel.textContent = 'Licznik chwilowo niedostępny';
+  supportCounter?.setAttribute('aria-label', 'Licznik chwilowo niedostępny');
 }
 
 function renderSupportedState(message = 'Wsparcie z tego urządzenia zostało już zapisane.') {
@@ -108,9 +134,11 @@ async function loadSupportCount() {
 
   try {
     const payload = await fetchCounter();
-    renderCount(extractCounterValue(payload));
+    const value = extractCounterValue(payload);
+    if (value === null) throw new Error('Odpowiedź licznika nie zawiera wartości.');
+    renderCount(value);
   } catch (error) {
-    // Nieistniejący jeszcze licznik lub chwilowa awaria pozostawia wartość początkową 0.
+    renderCounterUnavailable();
     console.warn('Nie udało się pobrać licznika wsparcia.', error);
   }
 }
@@ -128,15 +156,10 @@ async function submitSupport() {
   try {
     const payload = await fetchCounter('/up');
     const value = extractCounterValue(payload);
+    if (value === null) throw new Error('Odpowiedź licznika nie zawiera wartości.');
 
     storeSupport();
-    if (value !== null) {
-      renderCount(value);
-    } else if (supportCount) {
-      const current = Number(supportCount.textContent.replace(/\s/g, '')) || 0;
-      renderCount(current + 1);
-    }
-
+    renderCount(value);
     renderSupportedState('Dziękujemy. Wsparcie zostało zapisane.');
   } catch (error) {
     supportButton.disabled = false;
@@ -153,20 +176,13 @@ if (supportButton && supportCount) {
   supportButton.addEventListener('click', submitSupport);
 }
 
-const supportAction = document.querySelector('.support-action');
+const shareButton = document.querySelector('#share-button');
+const shareStatus = document.querySelector('#share-status');
 
-if (supportAction) {
-  const shareButton = document.createElement('button');
-  shareButton.className = 'btn';
-  shareButton.id = 'share-button';
-  shareButton.type = 'button';
-  shareButton.textContent = 'Powiedz znajomym';
-  shareButton.setAttribute('aria-label', 'Udostępnij petycję znajomym');
-  supportAction.append(shareButton);
-
+if (shareButton) {
   const shareData = {
     title: 'Ciszej na Osiedlu Nauczycielskim',
-    text: 'Pomóż mieszkańcom Osiedla Nauczycielskiego w Tarnowie. Zobacz petycję i wesprzyj inicjatywę.',
+    text: 'Poznaj historię pomiarów hałasu przy Osiedlu Nauczycielskim w Tarnowie i wesprzyj inicjatywę wykonania aktualnych pomiarów.',
     url: 'https://ciszejnaosiedlunauczycielskim.pl/'
   };
 
@@ -181,8 +197,10 @@ if (supportAction) {
         await navigator.clipboard.writeText(shareData.url);
         const originalLabel = shareButton.textContent;
         shareButton.textContent = 'Link skopiowany';
+        if (shareStatus) shareStatus.textContent = 'Link do strony został skopiowany.';
         window.setTimeout(() => {
           shareButton.textContent = originalLabel;
+          if (shareStatus) shareStatus.textContent = '';
         }, 2200);
         return;
       }
