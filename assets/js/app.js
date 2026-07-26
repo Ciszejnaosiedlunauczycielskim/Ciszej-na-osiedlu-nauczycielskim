@@ -39,7 +39,7 @@ const supportLabel = document.querySelector('#support-label');
 const supportStatus = document.querySelector('#support-status');
 const supportCounter = document.querySelector('.support-counter');
 
-const SUPPORT_API = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie';
+const SUPPORT_API = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie/';
 const SUPPORT_STORAGE_KEY = 'ciszej-wsparcie-zapisane-v1';
 const SUPPORT_COOKIE_NAME = 'ciszej_wsparcie_zapisane';
 const SUPPORT_TIMEOUT_MS = 8000;
@@ -137,7 +137,8 @@ async function requestCounter(path = '') {
   const timeoutId = window.setTimeout(() => controller.abort(), SUPPORT_TIMEOUT_MS);
 
   try {
-    const response = await fetch(`${SUPPORT_API}${path}`, {
+    const endpoint = path ? new URL(path.replace(/^\//, ''), SUPPORT_API).href : SUPPORT_API;
+    const response = await fetch(endpoint, {
       method: 'GET',
       mode: 'cors',
       cache: 'no-store',
