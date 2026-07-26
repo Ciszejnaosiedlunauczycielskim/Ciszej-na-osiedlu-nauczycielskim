@@ -11,11 +11,11 @@ jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
-      - name: Check CounterAPI responses and CORS
+      - name: Check CounterAPI cache behavior
         shell: bash
         run: |
           set -euo pipefail
-          BASE='https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie'
+          BASE='https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie/'
           ORIGIN='https://ciszejnaosiedlunauczycielskim.pl'
 
           request() {
@@ -32,11 +32,9 @@ jobs:
               "$url")
             echo "${label}_HTTP=${status}"
             echo "${label}_CORS=$(awk 'BEGIN{IGNORECASE=1} /^access-control-allow-origin:/ {gsub(/\r/,""); print $2}' headers.txt | tail -1)"
-            echo "${label}_LIMIT=$(awk 'BEGIN{IGNORECASE=1} /^x-ratelimit-limit:/ {gsub(/\r/,""); print $2}' headers.txt | tail -1)"
-            echo "${label}_REMAINING=$(awk 'BEGIN{IGNORECASE=1} /^x-ratelimit-remaining:/ {gsub(/\r/,""); print $2}' headers.txt | tail -1)"
+            echo "${label}_CACHE=$(awk 'BEGIN{IGNORECASE=1} /^cf-cache-status:/ {gsub(/\r/,""); print $2}' headers.txt | tail -1)"
             echo "${label}_BODY=$(cat body.txt)"
           }
 
-          request 'GET_BEFORE' "$BASE"
-          request 'UP' "$BASE/up"
-          request 'GET_AFTER' "$BASE"
+          request 'PLAIN' "$BASE"
+          request 'BUSTED' "${BASE}?_=$(date +%s%N)"
