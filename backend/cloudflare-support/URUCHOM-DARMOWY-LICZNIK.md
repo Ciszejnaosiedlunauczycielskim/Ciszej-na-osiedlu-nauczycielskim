@@ -8,7 +8,10 @@ Utwórz lub otwórz bezpłatne konto Cloudflare. Nie trzeba przenosić domeny an
 
 ## 2. Token API
 
-W Cloudflare utwórz token API z szablonu **Edit Cloudflare Workers** i ogranicz go do wybranego konta. Token musi pozwalać na wdrożenie Workers oraz utworzenie i obsługę D1.
+W Cloudflare utwórz **Custom token** ograniczony do wybranego konta. Ustaw uprawnienia konta:
+
+- `Workers Scripts` → `Edit`,
+- `D1` → `Edit`.
 
 Skopiuj również **Account ID** konta Cloudflare.
 
