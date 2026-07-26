@@ -63,6 +63,16 @@ p{margin-top:0}
 .feature-photo img,.inline-photo img,.context-photo img{width:100%;height:auto;border-radius:.85rem}
 .feature-photo figcaption,.inline-photo figcaption,.context-photo figcaption,.map-panel figcaption{padding:.65rem .1rem 0;color:var(--muted);font-size:.86rem}
 
+.support{padding:2.7rem 0;background:var(--navy);color:#fff}
+.support-inner{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2.5rem;align-items:center}
+.support-action{display:flex;flex-wrap:wrap;align-items:center;gap:1.1rem 1.35rem}
+.support h2{margin:0;color:#fff;font-size:clamp(2rem,4vw,3.05rem)}
+.support .btn{border-color:#fff;background:#fff;color:var(--navy)}
+.support .btn:hover{border-color:#f1d5d8;background:#f1d5d8}
+.support-counter{display:flex;align-items:baseline;justify-content:flex-end;gap:.7rem;text-align:right}
+.support-counter strong{color:#fff;font-size:clamp(3.5rem,8vw,6.2rem);font-variant-numeric:tabular-nums;letter-spacing:-.07em;line-height:.8}
+.support-counter span{max-width:150px;color:#d8e2e6;font-size:.88rem;font-weight:760;line-height:1.25;text-transform:uppercase;letter-spacing:.07em}
+
 .map-section{background:var(--soft)}
 .map-layout{display:grid;gap:1rem}
 .map-panel{padding:.55rem;border:1px solid var(--line);border-radius:.9rem;background:#fff}
@@ -163,6 +173,12 @@ footer{background:#0b171d;color:#b7c2c7}
   .actions{flex-direction:column}
   .actions .btn,.contact .btn{width:100%}
   .feature-photo img{border-radius:.55rem}
+  .support{padding:2.2rem 0}
+  .support-inner{grid-template-columns:1fr;gap:2.1rem;text-align:center}
+  .support-action{flex-direction:column;align-items:stretch;gap:1rem}
+  .support .btn{width:100%}
+  .support-counter{justify-content:center;text-align:left}
+  .support-counter strong{font-size:4.9rem}
   .map-layout{gap:.8rem}
   .map-panel{padding:.42rem;border-radius:.72rem}
   .map-overview figcaption::after{content:" Pełny układ miasta i powiększenie osiedla pokazujemy osobno poniżej."}
