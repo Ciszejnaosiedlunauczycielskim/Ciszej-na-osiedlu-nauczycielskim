@@ -42,38 +42,108 @@ const supportCounter = document.querySelector('.support-counter');
 const SUPPORT_API = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie/';
 const SUPPORT_STORAGE_KEY = 'ciszej-wsparcie-zapisane-v1';
 const SUPPORT_COOKIE_NAME = 'ciszej_wsparcie_zapisane';
-const SUPPORT_TIMEOUT_MS = 8000;
-const SUPPORT_READ_RETRY_DELAY_MS = 600;
+const SUPPORT_CACHE_KEY = 'ciszej-wsparcie-licznik-v2';
+const SUPPORT_PENDING_KEY = 'ciszej-wsparcie-oczekuje-v1';
+const SUPPORT_LOCK_KEY = 'ciszej-wsparcie-blokada-v1';
+const SUPPORT_TIMEOUT_MS = 10000;
+const SUPPORT_CACHE_MAX_AGE_MS = 60000;
+const SUPPORT_LOCK_MAX_AGE_MS = 20000;
+const SUPPORT_RETRY_DELAY_MS = 30000;
+
+let counterRequest = null;
+let refreshTimer = null;
+let pendingSubmitTimer = null;
+let supportChannel = null;
+
+try {
+  if ('BroadcastChannel' in window) {
+    supportChannel = new BroadcastChannel('ciszej-wsparcie-v1');
+  }
+} catch (error) {
+  console.warn('[LICZNIK] WARNING: BroadcastChannel niedostępny.', error);
+}
+
+function logCounter(stage, details = {}) {
+  const method = stage === 'ERROR' || stage === 'FINAL FAILURE' ? 'error' :
+    stage === 'WARNING' ? 'warn' : 'info';
+  console[method](`[LICZNIK] ${stage}`, details);
+}
+
+function safeStorageGet(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch (error) {
+    logCounter('WARNING', { place: 'localStorage.getItem', key, error });
+    return null;
+  }
+}
+
+function safeStorageSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (error) {
+    logCounter('WARNING', { place: 'localStorage.setItem', key, error });
+    return false;
+  }
+}
+
+function safeStorageRemove(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {
+    logCounter('WARNING', { place: 'localStorage.removeItem', key, error });
+  }
+}
 
 function readStoredSupport() {
-  try {
-    if (localStorage.getItem(SUPPORT_STORAGE_KEY) === '1') return true;
-  } catch (error) {
-    console.warn('Pamięć lokalna jest niedostępna.', error);
-  }
+  if (safeStorageGet(SUPPORT_STORAGE_KEY) === '1') return true;
 
   try {
     return document.cookie
       .split('; ')
       .some(cookie => cookie === `${SUPPORT_COOKIE_NAME}=1`);
   } catch (error) {
-    console.warn('Pliki cookie są niedostępne.', error);
+    logCounter('WARNING', { place: 'cookie.read', error });
     return false;
   }
 }
 
 function storeSupport() {
-  try {
-    localStorage.setItem(SUPPORT_STORAGE_KEY, '1');
-  } catch (error) {
-    console.warn('Nie udało się zapisać wsparcia w pamięci lokalnej.', error);
-  }
+  safeStorageSet(SUPPORT_STORAGE_KEY, '1');
+  safeStorageRemove(SUPPORT_PENDING_KEY);
 
   try {
     document.cookie = `${SUPPORT_COOKIE_NAME}=1; Max-Age=315360000; Path=/; SameSite=Lax; Secure`;
   } catch (error) {
-    console.warn('Nie udało się zapisać pliku cookie wsparcia.', error);
+    logCounter('WARNING', { place: 'cookie.write', error });
   }
+}
+
+function readCachedCounter() {
+  const raw = safeStorageGet(SUPPORT_CACHE_KEY);
+  if (!raw) return null;
+
+  try {
+    const cached = JSON.parse(raw);
+    const value = Number(cached?.value);
+    const updatedAt = Number(cached?.updatedAt);
+
+    if (!Number.isFinite(value) || !Number.isFinite(updatedAt)) return null;
+    return {
+      value: Math.max(0, Math.trunc(value)),
+      updatedAt
+    };
+  } catch (error) {
+    logCounter('WARNING', { place: 'cache.parse', error });
+    return null;
+  }
+}
+
+function storeCachedCounter(value) {
+  const cached = { value, updatedAt: Date.now() };
+  safeStorageSet(SUPPORT_CACHE_KEY, JSON.stringify(cached));
+  supportChannel?.postMessage({ type: 'counter', ...cached });
 }
 
 function extractCounterValue(payload) {
@@ -112,12 +182,27 @@ function renderCount(value) {
   supportCount.setAttribute('aria-label', `${formatted} ${label}`);
   supportLabel.textContent = label;
   supportCounter?.setAttribute('aria-label', `${formatted} ${label}`);
+  logCounter('DOM UPDATE', { value });
+}
+
+function renderCounterLoading() {
+  if (!supportCount || readCachedCounter()) return;
+  supportCount.textContent = '…';
+  supportCount.setAttribute('aria-label', 'Pobieranie aktualnej liczby osób wspierających');
+  if (supportLabel) supportLabel.textContent = 'pobieranie aktualnej liczby';
+  supportCounter?.setAttribute('aria-label', 'Pobieranie aktualnej liczby osób wspierających');
 }
 
 function renderCounterUnavailable() {
+  const cached = readCachedCounter();
+  if (cached) {
+    renderCount(cached.value);
+    return;
+  }
+
   if (supportCount) supportCount.textContent = '—';
   if (supportCount) supportCount.setAttribute('aria-label', 'Aktualizacja licznika chwilowo niedostępna');
-  if (supportLabel) supportLabel.textContent = 'Aktualizacja licznika chwilowo niedostępna';
+  if (supportLabel) supportLabel.textContent = 'licznik chwilowo się aktualizuje';
   supportCounter?.setAttribute('aria-label', 'Aktualizacja licznika chwilowo niedostępna');
 }
 
@@ -128,97 +213,284 @@ function renderSupportedState(message = 'Wsparcie z tego urządzenia zostało ju
   if (supportStatus) supportStatus.textContent = message;
 }
 
-function wait(milliseconds) {
-  return new Promise(resolve => window.setTimeout(resolve, milliseconds));
+function setPendingSupport(value) {
+  if (value) {
+    safeStorageSet(SUPPORT_PENDING_KEY, '1');
+  } else {
+    safeStorageRemove(SUPPORT_PENDING_KEY);
+  }
+}
+
+function hasPendingSupport() {
+  return safeStorageGet(SUPPORT_PENDING_KEY) === '1';
+}
+
+function acquireSubmitLock() {
+  const now = Date.now();
+  const existing = Number(safeStorageGet(SUPPORT_LOCK_KEY));
+
+  if (Number.isFinite(existing) && now - existing < SUPPORT_LOCK_MAX_AGE_MS) {
+    return false;
+  }
+
+  safeStorageSet(SUPPORT_LOCK_KEY, String(now));
+  return true;
+}
+
+function releaseSubmitLock() {
+  safeStorageRemove(SUPPORT_LOCK_KEY);
+}
+
+function scheduleCounterRefresh(delay = SUPPORT_RETRY_DELAY_MS) {
+  window.clearTimeout(refreshTimer);
+  refreshTimer = window.setTimeout(() => {
+    loadSupportCount({ force: true });
+  }, delay);
 }
 
 async function requestCounter(path = '') {
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), SUPPORT_TIMEOUT_MS);
+  const endpoint = path ? new URL(path.replace(/^\/+/, ''), SUPPORT_API).href : SUPPORT_API;
+
+  logCounter('API REQUEST', { endpoint, path });
 
   try {
-    const endpoint = path ? new URL(path.replace(/^\//, ''), SUPPORT_API).href : SUPPORT_API;
     const response = await fetch(endpoint, {
       method: 'GET',
       mode: 'cors',
       cache: 'no-store',
+      credentials: 'omit',
+      redirect: 'follow',
+      referrerPolicy: 'no-referrer',
       headers: { Accept: 'application/json' },
       signal: controller.signal
     });
 
     const body = await response.text();
+    logCounter('API RESPONSE', {
+      endpoint,
+      status: response.status,
+      ok: response.ok
+    });
 
     if (!response.ok) {
-      throw new Error(`Błąd licznika: ${response.status}${body ? ` — ${body.slice(0, 160)}` : ''}`);
+      const error = new Error(`Błąd licznika: ${response.status}${body ? ` — ${body.slice(0, 160)}` : ''}`);
+      error.status = response.status;
+      error.retryAfter = Number(response.headers.get('Retry-After')) || null;
+      throw error;
     }
 
     try {
-      return JSON.parse(body);
-    } catch {
-      throw new Error('Licznik zwrócił nieprawidłową odpowiedź JSON.');
+      const payload = JSON.parse(body);
+      logCounter('PARSE', { endpoint, success: true });
+      return payload;
+    } catch (error) {
+      throw new Error('Licznik zwrócił nieprawidłową odpowiedź JSON.', { cause: error });
     }
   } finally {
     window.clearTimeout(timeoutId);
   }
 }
 
-async function fetchCounter(path = '', { retryRead = false } = {}) {
-  try {
-    return await requestCounter(path);
-  } catch (error) {
-    if (!retryRead || path) throw error;
-    await wait(SUPPORT_READ_RETRY_DELAY_MS);
-    return requestCounter(path);
-  }
-}
-
-async function loadSupportCount() {
+async function loadSupportCount({ force = false } = {}) {
   if (!supportCount) return;
 
-  try {
-    const payload = await fetchCounter('', { retryRead: true });
-    const value = extractCounterValue(payload);
-    if (value === null) throw new Error('Odpowiedź licznika nie zawiera wartości.');
-    renderCount(value);
-  } catch (error) {
-    renderCounterUnavailable();
-    console.warn('Nie udało się pobrać licznika wsparcia.', error);
+  const cached = readCachedCounter();
+  if (cached) renderCount(cached.value);
+  if (!force && cached && Date.now() - cached.updatedAt < SUPPORT_CACHE_MAX_AGE_MS) {
+    logCounter('CACHE', { hit: true, ageMs: Date.now() - cached.updatedAt });
+    return;
   }
+
+  if (!navigator.onLine) {
+    logCounter('WARNING', { place: 'loadSupportCount', reason: 'offline' });
+    renderCounterUnavailable();
+    return;
+  }
+
+  if (counterRequest) return counterRequest;
+
+  renderCounterLoading();
+  logCounter('START', { operation: 'load' });
+
+  counterRequest = (async () => {
+    try {
+      const payload = await requestCounter();
+      const value = extractCounterValue(payload);
+      if (value === null) throw new Error('Odpowiedź licznika nie zawiera wartości.');
+
+      storeCachedCounter(value);
+      renderCount(value);
+      logCounter('FINAL SUCCESS', { operation: 'load', value });
+    } catch (error) {
+      renderCounterUnavailable();
+      const retryDelay = error?.status === 429 && error?.retryAfter
+        ? Math.max(SUPPORT_RETRY_DELAY_MS, error.retryAfter * 1000)
+        : SUPPORT_RETRY_DELAY_MS;
+      scheduleCounterRefresh(retryDelay);
+      logCounter('FINAL FAILURE', {
+        operation: 'load',
+        place: 'loadSupportCount',
+        reason: error?.message,
+        stack: error?.stack,
+        possibleImpact: 'Nie udało się odświeżyć globalnej liczby. Wyświetlana jest ostatnia zapisana wartość.'
+      });
+    } finally {
+      counterRequest = null;
+    }
+  })();
+
+  return counterRequest;
 }
 
-async function submitSupport() {
-  if (!supportButton || readStoredSupport()) {
+async function submitSupport({ fromPending = false } = {}) {
+  if (!supportButton) return;
+
+  if (readStoredSupport()) {
     renderSupportedState();
+    return;
+  }
+
+  if (!navigator.onLine) {
+    setPendingSupport(true);
+    supportButton.disabled = false;
+    supportButton.textContent = 'Oczekuje na internet';
+    if (supportStatus) {
+      supportStatus.textContent = 'Brak połączenia. Wsparcie zostanie wysłane automatycznie po odzyskaniu internetu.';
+    }
+    logCounter('RECOVERY', { operation: 'submit', action: 'queued-offline' });
+    return;
+  }
+
+  if (!acquireSubmitLock()) {
+    if (supportStatus) supportStatus.textContent = 'Wsparcie jest już zapisywane w innej karcie.';
     return;
   }
 
   supportButton.disabled = true;
   supportButton.textContent = 'Zapisywanie…';
   if (supportStatus) supportStatus.textContent = '';
+  logCounter('START', { operation: 'submit', fromPending });
 
   try {
-    // Nie ponawiamy żądania zwiększającego licznik, aby uniknąć podwójnego głosu
-    // w sytuacji, gdy serwer zapisze zmianę, ale odpowiedź nie dotrze do przeglądarki.
-    const payload = await fetchCounter('/up');
+    // Żądanie zwiększające licznik nie jest automatycznie ponawiane po wysłaniu,
+    // ponieważ CounterAPI v1 nie obsługuje kluczy idempotencji i ponowienie
+    // mogłoby dodać tę samą osobę drugi raz.
+    const payload = await requestCounter('up');
     const value = extractCounterValue(payload);
     if (value === null) throw new Error('Odpowiedź licznika nie zawiera wartości.');
 
     storeSupport();
+    storeCachedCounter(value);
     renderCount(value);
     renderSupportedState('Dziękujemy. Wsparcie zostało zapisane.');
+    supportChannel?.postMessage({ type: 'supported', value });
+    logCounter('FINAL SUCCESS', { operation: 'submit', value });
   } catch (error) {
-    supportButton.disabled = false;
-    supportButton.textContent = 'Spróbuj ponownie';
-    if (supportStatus) supportStatus.textContent = 'Nie udało się zapisać wsparcia. Spróbuj ponownie.';
-    console.error('Nie udało się zapisać wsparcia.', error);
+    const serverRejectedRequest = error?.status === 429 || error?.status >= 500;
+
+    if (serverRejectedRequest) {
+      const retryDelay = error?.status === 429 && error?.retryAfter
+        ? Math.max(SUPPORT_RETRY_DELAY_MS, error.retryAfter * 1000)
+        : SUPPORT_RETRY_DELAY_MS;
+
+      setPendingSupport(true);
+      supportButton.disabled = false;
+      supportButton.textContent = 'Oczekuje na zapis';
+      if (supportStatus) {
+        supportStatus.textContent = 'Serwer licznika jest chwilowo zajęty. Wsparcie zostanie wysłane automatycznie.';
+      }
+
+      window.clearTimeout(pendingSubmitTimer);
+      pendingSubmitTimer = window.setTimeout(() => {
+        if (hasPendingSupport() && !readStoredSupport() && navigator.onLine) {
+          submitSupport({ fromPending: true });
+        }
+      }, retryDelay);
+    } else {
+      setPendingSupport(false);
+      supportButton.disabled = false;
+      supportButton.textContent = 'Spróbuj ponownie';
+      if (supportStatus) {
+        supportStatus.textContent = 'Nie udało się potwierdzić zapisu. Sprawdź internet i spróbuj ponownie.';
+      }
+    }
+
+    logCounter('FINAL FAILURE', {
+      operation: 'submit',
+      place: 'submitSupport',
+      reason: error?.message,
+      stack: error?.stack,
+      possibleImpact: serverRejectedRequest
+        ? 'Zapis został bezpiecznie odłożony do ponowienia.'
+        : 'Serwer nie potwierdził zapisu; żądanie nie jest automatycznie ponawiane, aby uniknąć podwójnego głosu.'
+    });
+  } finally {
+    releaseSubmitLock();
   }
 }
 
 if (supportButton && supportCount) {
-  loadSupportCount();
+  logCounter('CONFIG', {
+    endpoint: SUPPORT_API,
+    timeoutMs: SUPPORT_TIMEOUT_MS,
+    cacheMaxAgeMs: SUPPORT_CACHE_MAX_AGE_MS
+  });
+
+  const cached = readCachedCounter();
+  if (cached) renderCount(cached.value);
+  else renderCounterLoading();
 
   if (readStoredSupport()) renderSupportedState();
-  supportButton.addEventListener('click', submitSupport);
+  supportButton.addEventListener('click', () => submitSupport());
+  loadSupportCount();
+
+  if (hasPendingSupport() && !readStoredSupport() && navigator.onLine) {
+    pendingSubmitTimer = window.setTimeout(() => submitSupport({ fromPending: true }), 1200);
+  }
+
+  window.addEventListener('online', () => {
+    logCounter('RECOVERY', { event: 'online' });
+    loadSupportCount({ force: true });
+    if (hasPendingSupport() && !readStoredSupport()) submitSupport({ fromPending: true });
+  });
+
+  window.addEventListener('offline', () => {
+    logCounter('WARNING', { event: 'offline' });
+    if (supportStatus && !readStoredSupport()) {
+      supportStatus.textContent = 'Brak połączenia z internetem.';
+    }
+  });
+
+  window.addEventListener('storage', event => {
+    if (event.key === SUPPORT_CACHE_KEY && event.newValue) {
+      const cachedValue = readCachedCounter();
+      if (cachedValue) renderCount(cachedValue.value);
+    }
+
+    if (event.key === SUPPORT_STORAGE_KEY && event.newValue === '1') {
+      renderSupportedState();
+    }
+  });
+
+  supportChannel?.addEventListener('message', event => {
+    if (event.data?.type === 'counter' && Number.isFinite(Number(event.data.value))) {
+      renderCount(Math.max(0, Math.trunc(Number(event.data.value))));
+    }
+
+    if (event.data?.type === 'supported') {
+      renderSupportedState();
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    const latest = readCachedCounter();
+    if (!latest || Date.now() - latest.updatedAt >= SUPPORT_CACHE_MAX_AGE_MS) {
+      loadSupportCount({ force: true });
+    }
+  });
 }
 
 const shareButton = document.querySelector('#share-button');
