@@ -1,0 +1,98 @@
+name: Jednorazowy audyt licznika
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/counter-audit-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  audit-counter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Pobierz repozytorium
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sprawdź składnię JavaScript
+        run: node --check assets/js/app.js
+
+      - name: Sprawdź powiązanie HTML ze skryptem
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'id="support-button"' index.html
+          grep -F 'id="support-count"' index.html
+          grep -F 'assets/js/app.js?v=36' index.html
+
+      - name: Sprawdź wdrożoną stronę i zgodność skryptu
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 3 --retry-delay 2 \
+            --max-time 30 'https://ciszejnaosiedlunauczycielskim.pl/' -o /tmp/live-index.html
+          grep -F 'id="support-button"' /tmp/live-index.html
+          grep -F 'id="support-count"' /tmp/live-index.html
+          grep -F 'assets/js/app.js?v=36' /tmp/live-index.html
+
+          curl --fail --silent --show-error --location --retry 3 --retry-delay 2 \
+            --max-time 30 'https://ciszejnaosiedlunauczycielskim.pl/assets/js/app.js?v=36' -o /tmp/live-app.js
+
+          diff -u assets/js/app.js /tmp/live-app.js
+          node --check /tmp/live-app.js
+
+      - name: Sprawdź odczyt CounterAPI i CORS bez zwiększania licznika
+        shell: bash
+        run: |
+          set -euo pipefail
+          endpoint='https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie/'
+          status=$(curl --silent --show-error --location --retry 3 --retry-delay 2 \
+            --max-time 30 \
+            -H 'Accept: application/json' \
+            -H 'Origin: https://ciszejnaosiedlunauczycielskim.pl' \
+            -D /tmp/counter-headers.txt \
+            -o /tmp/counter-body.json \
+            -w '%{http_code}' "$endpoint")
+
+          test "$status" = '200'
+          cat /tmp/counter-headers.txt
+          cat /tmp/counter-body.json
+
+          grep -Eiq '^access-control-allow-origin: (\*|https://ciszejnaosiedlunauczycielskim\.pl)' /tmp/counter-headers.txt
+
+          node <<'NODE'
+          const fs = require('fs');
+          const payload = JSON.parse(fs.readFileSync('/tmp/counter-body.json', 'utf8'));
+          const candidates = [
+            payload?.value,
+            payload?.count,
+            payload?.Count,
+            payload?.up_count,
+            payload?.data?.value,
+            payload?.data?.count,
+            payload?.data?.Count,
+            payload?.data?.up_count
+          ];
+          const value = candidates.find(item => Number.isFinite(Number(item)));
+          if (value === undefined) throw new Error('Brak numerycznej wartości licznika w odpowiedzi API');
+          console.log(`Aktualna wartość odczytana z API: ${Math.trunc(Number(value))}`);
+          NODE
+
+      - name: Usuń jednorazowy workflow
+        if: always()
+        shell: bash
+        run: |
+          set -e
+          rm -f .github/workflows/counter-audit-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/counter-audit-once.yml
+          if ! git diff --cached --quiet; then
+            git commit -m 'Usuń jednorazowy workflow audytu licznika'
+            git push origin HEAD:main
+          fi
