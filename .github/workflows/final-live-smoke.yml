@@ -1,0 +1,58 @@
+name: Final live smoke
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify production site
+        shell: bash
+        run: |
+          set -euo pipefail
+          SITE='https://ciszejnaosiedlunauczycielskim.pl/'
+          curl --silent --show-error --location --fail --max-time 30 -o index.html "$SITE?_=$(date +%s%N)"
+          grep -Fq 'Pomiar był. Wnioski były. Zabezpieczeń i aktualnego sprawdzenia nie ma.' index.html
+          grep -Fq 'Nie wykonano też proponowanych zabezpieczeń.' index.html
+          grep -Fq 'assets/img/wizualizacja-parku-handlowego-lwowska-redkom.jpg' index.html
+          grep -Fq 'assets/img/wschodnia-obwodnica-tarnowa-fixed.jpg' index.html
+          grep -Fq 'Planowana jednostka wojskowa w Tarnowie' index.html
+          grep -Fq 'assets/css/style.css?v=66' index.html
+          grep -Fq 'assets/js/app.js?v=35' index.html
+
+          for asset in \
+            'assets/css/style.css?v=66' \
+            'assets/js/app.js?v=35' \
+            'assets/img/wizualizacja-parku-handlowego-lwowska-redkom.jpg' \
+            'assets/img/wschodnia-obwodnica-tarnowa-fixed.jpg' \
+            'documents/petycja-osiedle-nauczycielskie-wersja-publiczna.pdf'; do
+            code=$(curl --silent --show-error --location --max-time 30 --output /dev/null --write-out '%{http_code}' "${SITE}${asset}")
+            echo "${asset}: ${code}"
+            test "$code" = '200'
+          done
+
+          curl --silent --show-error --location --fail --max-time 30 -o app.js "${SITE}assets/js/app.js?v=35&_=$(date +%s%N)"
+          grep -Fq "text: 'Poznaj historię pomiarów hałasu przy Osiedlu Nauczycielskim w Tarnowie i wesprzyj inicjatywę wykonania aktualnych pomiarów oraz wdrożenia zabezpieczeń przed hałasem.'" app.js
+          grep -Fq "const SUPPORT_API = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie/';" app.js
+          node --check app.js
+
+          API='https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie/'
+          curl --silent --show-error --location --fail --max-time 30 \
+            --header 'Origin: https://ciszejnaosiedlunauczycielskim.pl' \
+            --dump-header api-headers.txt \
+            -o api.json "${API}?_=$(date +%s%N)"
+          grep -Eiq '^access-control-allow-origin: \*' api-headers.txt
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('api.json').read_text())
+          assert isinstance(data.get('count'), int) and data['count'] >= 0
+          print('CounterAPI count:', data['count'])
+          PY
+
+          echo 'LIVE_SMOKE_OK'
