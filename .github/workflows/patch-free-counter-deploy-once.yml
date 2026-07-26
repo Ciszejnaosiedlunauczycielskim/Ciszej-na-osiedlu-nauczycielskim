@@ -1,0 +1,138 @@
+name: Jednorazowe utwardzenie darmowego wdrożenia
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/patch-free-counter-deploy-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Utwardź workflow i szablon frontendu
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          workflow_path = Path('.github/workflows/deploy-free-cloudflare-counter.yml')
+          workflow = workflow_path.read_text(encoding='utf-8')
+
+          old = '''          npx wrangler d1 execute "$DATABASE_NAME" \\
+            --remote \\
+            --yes \\
+            --file /tmp/0001_init_runtime.sql \\
+            --config wrangler.toml
+
+          npx wrangler d1 execute "$DATABASE_NAME" \\
+'''
+          new = '''          npx wrangler d1 execute "$DATABASE_NAME" \\
+            --remote \\
+            --yes \\
+            --file /tmp/0001_init_runtime.sql \\
+            --config wrangler.toml
+
+          # Bezpieczne wznowienie po przerwanym wcześniejszym wdrożeniu:
+          # dopisuje tylko wzrost starego licznika od ostatniej migracji.
+          npx wrangler d1 execute "$DATABASE_NAME" \\
+            --remote \\
+            --yes \\
+            --command "UPDATE support_state SET base_count = base_count + ($LEGACY_VALUE - legacy_counter_last), legacy_counter_last = $LEGACY_VALUE WHERE id = 1 AND $LEGACY_VALUE > legacy_counter_last;" \\
+            --config wrangler.toml
+
+          npx wrangler d1 execute "$DATABASE_NAME" \\
+'''
+          if old not in workflow:
+              raise SystemExit('Nie znaleziono miejsca pierwszego rozliczenia migracji')
+          workflow = workflow.replace(old, new)
+
+          old = '''          grep -q "$WORKER_URL" /tmp/production-app.js
+
+          curl -fsSL --max-time 20 \\
+            -H "Origin: $SITE_ORIGIN" \\
+            "$WORKER_URL/support/count?production-audit=$(date +%s)" \\
+            > /tmp/production-worker-count.json
+'''
+          new = '''          grep -q "$WORKER_URL" /tmp/production-app.js
+
+          # Rozlicz głosy wysłane do starego endpointu podczas samego wdrożenia,
+          # zanim wszystkie urządzenia pobrały nowy skrypt.
+          curl -fsSL --retry 3 --max-time 20 \\
+            "$LEGACY_COUNTER_URL?after-switch=$(date +%s)" > /tmp/legacy-counter-after-switch.json
+          LEGACY_VALUE_AFTER_SWITCH="$(node - <<'NODE'
+          const fs = require('fs');
+          const payload = JSON.parse(fs.readFileSync('/tmp/legacy-counter-after-switch.json', 'utf8'));
+          const candidates = [
+            payload?.value, payload?.count, payload?.Count, payload?.up_count,
+            payload?.data?.value, payload?.data?.count, payload?.data?.Count, payload?.data?.up_count
+          ];
+          const value = candidates.find(item => Number.isFinite(Number(item)));
+          if (value === undefined || Number(value) < 0) process.exit(1);
+          process.stdout.write(String(Math.trunc(Number(value))));
+          NODE
+          )"
+          echo "LEGACY_VALUE_AFTER_SWITCH=$LEGACY_VALUE_AFTER_SWITCH" >> "$GITHUB_ENV"
+
+          (
+            cd "$BACKEND_DIR"
+            npx wrangler d1 execute "$DATABASE_NAME" \\
+              --remote \\
+              --yes \\
+              --command "UPDATE support_state SET base_count = base_count + ($LEGACY_VALUE_AFTER_SWITCH - legacy_counter_last), legacy_counter_last = $LEGACY_VALUE_AFTER_SWITCH WHERE id = 1 AND $LEGACY_VALUE_AFTER_SWITCH > legacy_counter_last;" \\
+              --config wrangler.toml
+          )
+
+          curl -fsSL --max-time 20 \\
+            -H "Origin: $SITE_ORIGIN" \\
+            "$WORKER_URL/support/count?production-audit=$(date +%s)" \\
+            > /tmp/production-worker-count.json
+'''
+          if old not in workflow:
+              raise SystemExit('Nie znaleziono miejsca rozliczenia po przełączeniu')
+          workflow = workflow.replace(old, new)
+          workflow = workflow.replace(
+              '          report.productionValue = Number(process.env.PRODUCTION_VALUE);\n',
+              '          report.productionValue = Number(process.env.PRODUCTION_VALUE);\n          report.legacyValueAfterSwitch = Number(process.env.LEGACY_VALUE_AFTER_SWITCH);\n'
+          )
+          workflow_path.write_text(workflow, encoding='utf-8')
+
+          template_path = Path('backend/cloudflare-support/frontend-app.template.js')
+          template = template_path.read_text(encoding='utf-8')
+          template = template.replace(
+              'function storeCachedCount(value) {',
+              'function storeCachedCount(value, { broadcast = true } = {}) {'
+          )
+          template = template.replace(
+              "  supportChannel?.postMessage({ type: 'counter', ...cached });\n  return cached.value;",
+              "  if (broadcast) supportChannel?.postMessage({ type: 'counter', ...cached });\n  return cached.value;"
+          )
+          template = template.replace(
+              'renderCount(storeCachedCount(event.data.value));',
+              'renderCount(storeCachedCount(event.data.value, { broadcast: false }));'
+          )
+          template_path.write_text(template, encoding='utf-8')
+          PY
+
+          node --check backend/cloudflare-support/frontend-app.template.js
+          grep -q 'LEGACY_VALUE_AFTER_SWITCH' .github/workflows/deploy-free-cloudflare-counter.yml
+          grep -q 'broadcast: false' backend/cloudflare-support/frontend-app.template.js
+
+      - name: Zapisz poprawki i usuń jednorazowy workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/patch-free-counter-deploy-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/deploy-free-cloudflare-counter.yml backend/cloudflare-support/frontend-app.template.js .github/workflows/patch-free-counter-deploy-once.yml
+          git commit -m "Utwardź migrację i synchronizację darmowego licznika"
+          git push origin HEAD:main
