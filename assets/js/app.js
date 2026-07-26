@@ -152,3 +152,46 @@ if (supportButton && supportCount) {
   if (readStoredSupport()) renderSupportedState();
   supportButton.addEventListener('click', submitSupport);
 }
+
+const supportAction = document.querySelector('.support-action');
+
+if (supportAction) {
+  const shareButton = document.createElement('button');
+  shareButton.className = 'btn';
+  shareButton.id = 'share-button';
+  shareButton.type = 'button';
+  shareButton.textContent = 'Powiedz znajomym';
+  shareButton.setAttribute('aria-label', 'Udostępnij petycję znajomym');
+  supportAction.append(shareButton);
+
+  const shareData = {
+    title: 'Ciszej na Osiedlu Nauczycielskim',
+    text: 'Pomóż mieszkańcom Osiedla Nauczycielskiego w Tarnowie. Zobacz petycję i wesprzyj inicjatywę.',
+    url: 'https://ciszejnaosiedlunauczycielskim.pl/'
+  };
+
+  shareButton.addEventListener('click', async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareData.url);
+        const originalLabel = shareButton.textContent;
+        shareButton.textContent = 'Link skopiowany';
+        window.setTimeout(() => {
+          shareButton.textContent = originalLabel;
+        }, 2200);
+        return;
+      }
+
+      window.prompt('Skopiuj link do petycji:', shareData.url);
+    } catch (error) {
+      if (error?.name !== 'AbortError') {
+        console.error('Nie udało się udostępnić petycji.', error);
+      }
+    }
+  });
+}
