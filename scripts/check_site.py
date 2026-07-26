@@ -2,19 +2,14 @@ from __future__ import annotations
 
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 HTML_FILES = [ROOT / "index.html", ROOT / "historia-sprawy.html"]
 REQUIRED_FILES = [
-    ROOT / "assets/img/osiedle-miedzy-drogami-4k.webp",
-    ROOT / "assets/img/osiedle-miedzy-drogami-4k.jpg",
-    ROOT / "assets/img/brak-panelu-przy-osiedlu-4k.webp",
-    ROOT / "assets/img/brak-panelu-przy-osiedlu-4k.jpg",
-    ROOT / "assets/img/mapa-osiedla-nauczycielskiego-tarnow-nowa.avif",
-    ROOT / "assets/img/mapa-osiedle-park-lwowska-4k.webp",
-    ROOT / "assets/img/mapa-osiedle-park-lwowska-4k.jpg",
-    ROOT / "assets/img/wizualizacja-parku-handlowego-lwowska-redkom.jpg",
+    ROOT / "assets/img/WIDOK NA OSIEDLE W KLINIE.jpeg",
+    ROOT / "assets/img/WIDOK NA BRAK PANELI.jpeg",
+    ROOT / "assets/img/MAPA MIASTA I OSIEDLA.png",
     ROOT / "documents/petycja-osiedle-nauczycielskie-wersja-publiczna.pdf",
 ]
 REQUIRED_HOME_IDS = {"top", "miejsce", "mapa", "historia", "teraz", "dalej", "dokumenty"}
@@ -69,9 +64,9 @@ def is_local_reference(value: str) -> bool:
 
 
 def resolve_local_reference(page: Path, value: str) -> Path:
-    path = value.split(",", 1)[0].strip().split(" ", 1)[0]
+    path = value.split(",", 1)[0].strip()
     path = path.split("#", 1)[0].split("?", 1)[0]
-    return (page.parent / path).resolve()
+    return (page.parent / unquote(path)).resolve()
 
 
 def check_page(page: Path) -> list[str]:
