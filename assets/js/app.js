@@ -105,9 +105,9 @@ function renderCount(value) {
 
 function renderCounterUnavailable() {
   if (supportCount) supportCount.textContent = '—';
-  if (supportCount) supportCount.setAttribute('aria-label', 'Licznik chwilowo niedostępny');
-  if (supportLabel) supportLabel.textContent = 'Licznik chwilowo niedostępny';
-  supportCounter?.setAttribute('aria-label', 'Licznik chwilowo niedostępny');
+  if (supportCount) supportCount.setAttribute('aria-label', 'Aktualizacja licznika chwilowo niedostępna');
+  if (supportLabel) supportLabel.textContent = 'Aktualizacja licznika chwilowo niedostępna';
+  supportCounter?.setAttribute('aria-label', 'Aktualizacja licznika chwilowo niedostępna');
 }
 
 function renderSupportedState(message = 'Wsparcie z tego urządzenia zostało już zapisane.') {
