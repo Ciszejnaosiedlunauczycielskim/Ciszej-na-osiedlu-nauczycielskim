@@ -1,0 +1,140 @@
+name: Jednorazowy audyt licznika z raportem
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/counter-audit-report.yml
+
+permissions:
+  contents: write
+
+jobs:
+  audit-counter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Pobierz repozytorium
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Wykonaj audyt i zapisz raport
+        shell: bash
+        run: |
+          set +e
+          report='counter-audit-result.txt'
+          : > "$report"
+          overall=PASS
+
+          check() {
+            name="$1"
+            shift
+            "$@" >/tmp/check.out 2>/tmp/check.err
+            code=$?
+            if [ "$code" -eq 0 ]; then
+              printf 'PASS | %s\n' "$name" >> "$report"
+            else
+              printf 'FAIL | %s | exit=%s\n' "$name" "$code" >> "$report"
+              sed 's/^/  OUT: /' /tmp/check.out >> "$report"
+              sed 's/^/  ERR: /' /tmp/check.err >> "$report"
+              overall=FAIL
+            fi
+          }
+
+          check 'Składnia repozytoryjnego app.js' node --check assets/js/app.js
+          check 'HTML zawiera support-button' grep -F 'id="support-button"' index.html
+          check 'HTML zawiera support-count' grep -F 'id="support-count"' index.html
+          check 'HTML ładuje app.js?v=36' grep -F 'assets/js/app.js?v=36' index.html
+
+          curl --fail --silent --show-error --location --retry 3 --retry-delay 2 --max-time 30 \
+            'https://ciszejnaosiedlunauczycielskim.pl/' -o /tmp/live-index.html
+          if [ "$?" -eq 0 ]; then
+            printf 'PASS | Pobranie strony produkcyjnej\n' >> "$report"
+          else
+            printf 'FAIL | Pobranie strony produkcyjnej\n' >> "$report"
+            overall=FAIL
+          fi
+
+          check 'Produkcja zawiera support-button' grep -F 'id="support-button"' /tmp/live-index.html
+          check 'Produkcja zawiera support-count' grep -F 'id="support-count"' /tmp/live-index.html
+          check 'Produkcja ładuje app.js?v=36' grep -F 'assets/js/app.js?v=36' /tmp/live-index.html
+
+          curl --fail --silent --show-error --location --retry 3 --retry-delay 2 --max-time 30 \
+            'https://ciszejnaosiedlunauczycielskim.pl/assets/js/app.js?v=36' -o /tmp/live-app.js
+          if [ "$?" -eq 0 ]; then
+            printf 'PASS | Pobranie produkcyjnego app.js?v=36\n' >> "$report"
+          else
+            printf 'FAIL | Pobranie produkcyjnego app.js?v=36\n' >> "$report"
+            overall=FAIL
+          fi
+
+          check 'Produkcja ma identyczny app.js jak main' diff -u assets/js/app.js /tmp/live-app.js
+          check 'Składnia produkcyjnego app.js' node --check /tmp/live-app.js
+
+          endpoint='https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie/'
+          status=$(curl --silent --show-error --location --retry 3 --retry-delay 2 --max-time 30 \
+            -H 'Accept: application/json' \
+            -H 'Origin: https://ciszejnaosiedlunauczycielskim.pl' \
+            -D /tmp/counter-headers.txt \
+            -o /tmp/counter-body.json \
+            -w '%{http_code}' "$endpoint")
+
+          if [ "$status" = '200' ]; then
+            printf 'PASS | CounterAPI HTTP 200\n' >> "$report"
+          else
+            printf 'FAIL | CounterAPI HTTP status=%s\n' "$status" >> "$report"
+            overall=FAIL
+          fi
+
+          if grep -Eiq '^access-control-allow-origin: (\*|https://ciszejnaosiedlunauczycielskim\.pl)' /tmp/counter-headers.txt; then
+            printf 'PASS | CounterAPI zezwala na CORS dla strony\n' >> "$report"
+          else
+            printf 'FAIL | Brak prawidłowego nagłówka CORS\n' >> "$report"
+            sed 's/^/  HEADER: /' /tmp/counter-headers.txt >> "$report"
+            overall=FAIL
+          fi
+
+          node <<'NODE' >/tmp/counter-value.txt 2>/tmp/counter-json-error.txt
+          const fs = require('fs');
+          const payload = JSON.parse(fs.readFileSync('/tmp/counter-body.json', 'utf8'));
+          const candidates = [
+            payload?.value,
+            payload?.count,
+            payload?.Count,
+            payload?.up_count,
+            payload?.data?.value,
+            payload?.data?.count,
+            payload?.data?.Count,
+            payload?.data?.up_count
+          ];
+          const value = candidates.find(item => Number.isFinite(Number(item)));
+          if (value === undefined) process.exit(2);
+          process.stdout.write(String(Math.max(0, Math.trunc(Number(value)))));
+          NODE
+          json_code=$?
+
+          if [ "$json_code" -eq 0 ]; then
+            value=$(cat /tmp/counter-value.txt)
+            printf 'PASS | CounterAPI zwraca liczbę | value=%s\n' "$value" >> "$report"
+          else
+            printf 'FAIL | Odpowiedź CounterAPI nie zawiera poprawnej liczby\n' >> "$report"
+            sed 's/^/  ERR: /' /tmp/counter-json-error.txt >> "$report"
+            sed 's/^/  BODY: /' /tmp/counter-body.json >> "$report"
+            overall=FAIL
+          fi
+
+          printf 'OVERALL=%s\n' "$overall" | cat - "$report" > /tmp/report-final
+          mv /tmp/report-final "$report"
+
+      - name: Zapisz raport i usuń workflow
+        if: always()
+        shell: bash
+        run: |
+          set -e
+          rm -f .github/workflows/counter-audit-report.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add counter-audit-result.txt .github/workflows/counter-audit-report.yml
+          git commit -m 'Zapisz wynik jednorazowego audytu licznika'
+          git push origin HEAD:main
