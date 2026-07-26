@@ -42,6 +42,8 @@ const supportCounter = document.querySelector('.support-counter');
 const SUPPORT_API = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie';
 const SUPPORT_STORAGE_KEY = 'ciszej-wsparcie-zapisane-v1';
 const SUPPORT_COOKIE_NAME = 'ciszej_wsparcie_zapisane';
+const SUPPORT_TIMEOUT_MS = 8000;
+const SUPPORT_READ_RETRY_DELAY_MS = 600;
 
 function readStoredSupport() {
   try {
@@ -50,9 +52,14 @@ function readStoredSupport() {
     console.warn('Pamięć lokalna jest niedostępna.', error);
   }
 
-  return document.cookie
-    .split('; ')
-    .some(cookie => cookie === `${SUPPORT_COOKIE_NAME}=1`);
+  try {
+    return document.cookie
+      .split('; ')
+      .some(cookie => cookie === `${SUPPORT_COOKIE_NAME}=1`);
+  } catch (error) {
+    console.warn('Pliki cookie są niedostępne.', error);
+    return false;
+  }
 }
 
 function storeSupport() {
@@ -62,7 +69,11 @@ function storeSupport() {
     console.warn('Nie udało się zapisać wsparcia w pamięci lokalnej.', error);
   }
 
-  document.cookie = `${SUPPORT_COOKIE_NAME}=1; Max-Age=315360000; Path=/; SameSite=Lax; Secure`;
+  try {
+    document.cookie = `${SUPPORT_COOKIE_NAME}=1; Max-Age=315360000; Path=/; SameSite=Lax; Secure`;
+  } catch (error) {
+    console.warn('Nie udało się zapisać pliku cookie wsparcia.', error);
+  }
 }
 
 function extractCounterValue(payload) {
@@ -117,23 +128,54 @@ function renderSupportedState(message = 'Wsparcie z tego urządzenia zostało ju
   if (supportStatus) supportStatus.textContent = message;
 }
 
-async function fetchCounter(path = '') {
-  const response = await fetch(`${SUPPORT_API}${path}`, {
-    method: 'GET',
-    mode: 'cors',
-    cache: 'no-store',
-    headers: { Accept: 'application/json' }
-  });
+function wait(milliseconds) {
+  return new Promise(resolve => window.setTimeout(resolve, milliseconds));
+}
 
-  if (!response.ok) throw new Error(`Błąd licznika: ${response.status}`);
-  return response.json();
+async function requestCounter(path = '') {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), SUPPORT_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(`${SUPPORT_API}${path}`, {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+      signal: controller.signal
+    });
+
+    const body = await response.text();
+
+    if (!response.ok) {
+      throw new Error(`Błąd licznika: ${response.status}${body ? ` — ${body.slice(0, 160)}` : ''}`);
+    }
+
+    try {
+      return JSON.parse(body);
+    } catch {
+      throw new Error('Licznik zwrócił nieprawidłową odpowiedź JSON.');
+    }
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
+
+async function fetchCounter(path = '', { retryRead = false } = {}) {
+  try {
+    return await requestCounter(path);
+  } catch (error) {
+    if (!retryRead || path) throw error;
+    await wait(SUPPORT_READ_RETRY_DELAY_MS);
+    return requestCounter(path);
+  }
 }
 
 async function loadSupportCount() {
   if (!supportCount) return;
 
   try {
-    const payload = await fetchCounter();
+    const payload = await fetchCounter('', { retryRead: true });
     const value = extractCounterValue(payload);
     if (value === null) throw new Error('Odpowiedź licznika nie zawiera wartości.');
     renderCount(value);
@@ -154,6 +196,8 @@ async function submitSupport() {
   if (supportStatus) supportStatus.textContent = '';
 
   try {
+    // Nie ponawiamy żądania zwiększającego licznik, aby uniknąć podwójnego głosu
+    // w sytuacji, gdy serwer zapisze zmianę, ale odpowiedź nie dotrze do przeglądarki.
     const payload = await fetchCounter('/up');
     const value = extractCounterValue(payload);
     if (value === null) throw new Error('Odpowiedź licznika nie zawiera wartości.');
