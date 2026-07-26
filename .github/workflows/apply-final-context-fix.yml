@@ -1,0 +1,97 @@
+name: Apply final context repair
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.head_ref == 'fix-context-counter-sources'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Apply exact requested repairs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          index = Path('index.html')
+          text = index.read_text(encoding='utf-8')
+
+          old_traffic = '''            <p class="context-data"><strong>Prognoza z dokumentacji:</strong> na terenie przedsięwzięcia przewidziano ruch około 6000 samochodów osobowych, 120 pojazdów dostawczych i 14 pojazdów ciężarowych na dobę. Są to wartości prognozowane, a nie wykonane pomiary.</p>'''
+          new_traffic = '''            <p class="context-data">Dokumentacja inwestycji przewiduje ruch sięgający około 6000 samochodów osobowych na dobę oraz dodatkowo około 120 pojazdów dostawczych i 14 pojazdów ciężarowych. Są to wartości prognozowane, a nie wykonane pomiary. Rzeczywisty ruch będzie można ocenić dopiero po uruchomieniu obiektu.</p>'''
+          assert old_traffic in text
+          text = text.replace(old_traffic, new_traffic, 1)
+
+          park_sources = '''            <p class="source-links">
+              <a href="https://redkomdevelopment.com/retail/tarnow/" target="_blank" rel="noopener noreferrer">Oficjalna strona inwestycji — Redkom Development</a>
+              <a href="https://retailnet.pl/2026/07/23/redkom-development-rozpoczyna-budowe/" target="_blank" rel="noopener noreferrer">Najnowsza aktualizacja — rozpoczęcie budowy, 23 lipca 2026</a>
+              <a href="https://retailnet.pl/2026/07/03/redkom-development-blisko-finalu-komercjalizacji-parku-handlowego-w-tarnowie/" target="_blank" rel="noopener noreferrer">Komercjalizacja i planowane otwarcie</a>
+              <a href="https://redkomdevelopment.com/cinema-city-wejdzie-do-parku-handlowego-w-tarnowie-redkom-development-wyznacza-nowy-standard-retail-parkow/" target="_blank" rel="noopener noreferrer">Cinema City w Parku Handlowym Lwowska</a>
+              <a href="documents/petycja-osiedle-nauczycielskie-wersja-publiczna.pdf" target="_blank" rel="noopener noreferrer">Źródło danych ruchowych — publiczna wersja petycji, sekcja 6.2</a>
+            </p>
+'''
+          park_figure = '''          <figure class="context-photo">
+            <img src="assets/img/wizualizacja-parku-handlowego-lwowska-redkom.jpg" alt="Wizualizacja Parku Handlowego Lwowska we wschodniej części Tarnowa" width="1600" height="900" loading="lazy" decoding="async">
+            <figcaption>Wizualizacja Parku Handlowego Lwowska. Inwestycja powstaje przy ul. Lwowskiej we wschodniej części Tarnowa. Źródło: <a href="https://redkomdevelopment.com/retail/tarnow/" target="_blank" rel="noopener noreferrer">Redkom Development</a>.</figcaption>
+          </figure>'''
+          assert park_sources in text and park_figure in text
+          text = text.replace(park_sources, '', 1)
+          text = text.replace(park_figure, park_figure + '\n' + park_sources.rstrip(), 1)
+
+          bypass_sources = '''            <p class="source-links">
+              <a href="https://www.gov.pl/web/infrastruktura/wojewodztwo-malopolskie" target="_blank" rel="noopener noreferrer">Aktualny stan prac, finansowanie i harmonogram — Ministerstwo Infrastruktury</a>
+              <a href="https://www.gov.pl/web/infrastruktura/program-inwestycyjny-dla-przygotowan-do-budowy-wschodniej-obwodnicy-tarnowa-podpisany" target="_blank" rel="noopener noreferrer">Program inwestycyjny i finansowanie prac przygotowawczych — Ministerstwo Infrastruktury</a>
+              <a href="https://www.tarnowska.tv/artykul/26073%2Cnadzieja-dla-wschodniej-obwodnicy-tarnowa-tym-razem-moze-pomoc-rzad" target="_blank" rel="noopener noreferrer">Zapowiedź możliwego finansowania miejskiego odcinka</a>
+              <a href="https://gmina.tarnow.pl/nowastrona/index.php/2056-informacja-w-sprawie-budowy-wschodniej-obwodnicy-tarnowa" target="_blank" rel="noopener noreferrer">Informacja o analizie nowych wariantów przebiegu — Gmina Tarnów</a>
+              <a href="https://www.gov.pl/web/infrastruktura/zwiekszymy-finansowanie-drog-lokalnych" target="_blank" rel="noopener noreferrer">Planowane rozszerzenie zasad finansowania dróg w miastach na prawach powiatu</a>
+            </p>
+'''
+          bypass_figure = '''          <figure class="context-photo">
+            <img src="assets/img/wschodnia-obwodnica-tarnowa-fixed.jpg" alt="Poglądowa mapa jednego z rozważanych przebiegów wschodniej obwodnicy Tarnowa w odniesieniu do Osiedla Nauczycielskiego" width="1536" height="864" loading="lazy" decoding="async">
+            <figcaption>Poglądowe przedstawienie jednego z rozważanych przebiegów wschodniej obwodnicy. Ostateczny wariant trasy nie został przesądzony.</figcaption>
+          </figure>'''
+          assert bypass_sources in text and bypass_figure in text
+          text = text.replace(bypass_sources, '', 1)
+          text = text.replace(bypass_figure, bypass_figure + '\n' + bypass_sources.rstrip(), 1)
+
+          assert '<link rel="stylesheet" href="assets/css/style.css?v=66">' in text
+          assert '<script src="assets/js/app.js?v=35" defer></script>' in text
+          assert 'Nie wykonano też proponowanych zabezpieczeń.' in text
+          index.write_text(text, encoding='utf-8')
+
+          app = Path('assets/js/app.js')
+          js = app.read_text(encoding='utf-8')
+          old_api = "const SUPPORT_API = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie';"
+          new_api = "const SUPPORT_API = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie/';"
+          assert old_api in js
+          js = js.replace(old_api, new_api, 1)
+          old_fetch = "    const response = await fetch(`${SUPPORT_API}${path}`, {"
+          new_fetch = "    const endpoint = path ? new URL(path.replace(/^\\//, ''), SUPPORT_API).href : SUPPORT_API;\n    const response = await fetch(endpoint, {"
+          assert old_fetch in js
+          js = js.replace(old_fetch, new_fetch, 1)
+          app.write_text(js, encoding='utf-8')
+
+          history = Path('historia-sprawy.html')
+          history_text = history.read_text(encoding='utf-8')
+          assert history_text.count('assets/css/style.css?v=65') == 1
+          history.write_text(history_text.replace('assets/css/style.css?v=65', 'assets/css/style.css?v=66', 1), encoding='utf-8')
+          PY
+
+      - name: Commit repaired files
+        shell: bash
+        run: |
+          rm .github/workflows/apply-final-context-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/js/app.js historia-sprawy.html .github/workflows/apply-final-context-fix.yml
+          git commit -m "Finalize context and counter repair"
+          git push origin HEAD:${{ github.head_ref }}
