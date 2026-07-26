@@ -1,0 +1,23 @@
+name: Counter final read
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read current CounterAPI value
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie/'
+          status=$(curl --silent --show-error --location --max-time 30 --header 'Origin: https://ciszejnaosiedlunauczycielskim.pl' --dump-header headers.txt --output body.txt --write-out '%{http_code}' "${URL}?_=$(date +%s%N)")
+          echo "HTTP=${status}"
+          echo "CORS=$(awk 'BEGIN{IGNORECASE=1} /^access-control-allow-origin:/ {gsub(/\r/,""); print $2}' headers.txt | tail -1)"
+          echo "LIMIT=$(awk 'BEGIN{IGNORECASE=1} /^x-ratelimit-limit:/ {gsub(/\r/,""); print $2}' headers.txt | tail -1)"
+          echo "BODY=$(cat body.txt)"
