@@ -53,6 +53,22 @@ p{margin-top:0}
 .hero-lead{max-width:850px;margin-bottom:.72rem;font-size:1.16rem}
 .hero-note{max-width:820px;color:var(--muted);font-size:1.02rem}
 .actions{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.35rem}
+.hero-support-link{
+  display:inline-block;
+  margin-top:.9rem;
+  color:var(--red);
+  font-size:.92rem;
+  font-weight:780;
+  text-decoration:underline;
+  text-underline-offset:.22em;
+}
+.hero-support-link:hover{
+  color:var(--red-dark);
+}
+.hero-support-link:focus-visible{
+  outline:3px solid var(--focus);
+  outline-offset:3px;
+}
 .btn{display:inline-flex;min-height:48px;align-items:center;justify-content:center;padding:.72rem 1rem;border:1px solid transparent;border-radius:.7rem;font-weight:820;text-decoration:none}
 .btn.primary{background:var(--red);color:#fff}
 .btn.primary:hover{background:var(--red-dark)}
