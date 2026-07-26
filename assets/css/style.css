@@ -174,7 +174,11 @@ footer{background:#0b171d;color:#b7c2c7}
   nav a:hover{background:var(--soft)}
   #menu{display:inline-flex}
   .two-col,.next-layout,.document-layout{grid-template-columns:1fr;gap:.7rem}
-  .context-item,.context-item-text{grid-template-columns:1fr;gap:1.5rem}
+  .context-item,.context-item-text{display:flex;flex-direction:column;gap:0}
+  .context-item .context-copy{display:contents}
+  .context-item .context-copy>*{order:1}
+  .context-item .context-photo{order:2;margin-top:1.2rem}
+  .context-item .source-links{order:3}
   .media-copy{grid-template-columns:1fr}
 }
 
