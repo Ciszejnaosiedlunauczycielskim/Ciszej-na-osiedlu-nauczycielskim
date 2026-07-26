@@ -1,0 +1,15 @@
+{
+  "name": "ciszej-support-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create ciszej-support",
+    "db:migrate:local": "wrangler d1 migrations apply ciszej-support --local",
+    "db:migrate:remote": "wrangler d1 migrations apply ciszej-support --remote"
+  },
+  "devDependencies": {
+    "wrangler": "^4.36.0"
+  }
+}
