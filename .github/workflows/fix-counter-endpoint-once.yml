@@ -1,0 +1,75 @@
+name: Jednorazowo napraw licznik wsparcia
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fix-counter-endpoint-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Napraw endpoint i wymuś odświeżenie skryptu
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          app = Path('assets/js/app.js')
+          text = app.read_text(encoding='utf-8')
+          old = "const SUPPORT_API = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie';"
+          new = "const SUPPORT_API = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie/';"
+          if old not in text:
+              raise SystemExit('Nie znaleziono błędnego endpointu licznika')
+          app.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          index = Path('index.html')
+          html = index.read_text(encoding='utf-8')
+          old_version = 'assets/js/app.js?v=39'
+          new_version = 'assets/js/app.js?v=40'
+          if old_version not in html:
+              raise SystemExit('Nie znaleziono wersji app.js?v=39')
+          index.write_text(html.replace(old_version, new_version, 1), encoding='utf-8')
+
+          test = Path('tests/counter-contract.test.mjs')
+          test_text = test.read_text(encoding='utf-8')
+          anchor = "assert.equal(occurrences(production, \"requestCounter('/up')\"), 1, 'produkcja może mieć tylko jedno miejsce wysyłające zapis');"
+          assertion = "assert.match(production, /const SUPPORT_API = 'https:\\/\\/api\\.counterapi\\.dev\\/v1\\/ciszejnaosiedlunauczycielskim-2026-7c9f1e\\/wsparcie\\/';/, 'produkcyjny endpoint odczytu musi kończyć się ukośnikiem');"
+          if assertion not in test_text:
+              if anchor not in test_text:
+                  raise SystemExit('Nie znaleziono miejsca na test endpointu')
+              test_text = test_text.replace(anchor, anchor + '\n' + assertion, 1)
+          test_text = test_text.replace('assets\\/js\\/app\\.js\\?v=39', 'assets\\/js\\/app\\.js\\?v=40')
+          test_text = test_text.replace('assets/js/app.js?v=39', 'assets/js/app.js?v=40')
+          test.write_text(test_text, encoding='utf-8')
+          PY
+
+      - name: Audyt naprawczy
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "const SUPPORT_API = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie/';" assets/js/app.js
+          grep -Fq 'assets/js/app.js?v=40' index.html
+          node --check assets/js/app.js
+          node tests/counter-contract.test.mjs
+
+      - name: Zapisz naprawę i usuń workflow jednorazowy
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/fix-counter-endpoint-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/js/app.js index.html tests/counter-contract.test.mjs .github/workflows/fix-counter-endpoint-once.yml
+          git commit -m 'Napraw endpoint licznika wsparcia i dodaj test regresji'
+          git push origin HEAD:main
