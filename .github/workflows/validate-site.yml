@@ -1,0 +1,31 @@
+name: Sprawdź stronę i licznik
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Pobierz repozytorium
+        uses: actions/checkout@v4
+
+      - name: Ustaw Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Sprawdź składnię JavaScript
+        run: |
+          node --check assets/js/app.js
+          node --check backend/cloudflare-support/frontend-app.template.js
+          node --check backend/cloudflare-support/src/index.js
+
+      - name: Sprawdź kontrakt licznika
+        run: node tests/counter-contract.test.mjs
