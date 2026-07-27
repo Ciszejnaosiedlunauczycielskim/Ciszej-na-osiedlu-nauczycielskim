@@ -10,6 +10,7 @@ function occurrences(source, fragment) {
 }
 
 assert.equal(occurrences(production, "requestCounter('/up')"), 1, 'produkcja może mieć tylko jedno miejsce wysyłające zapis');
+assert.match(production, /const SUPPORT_API = 'https:\/\/api\.counterapi\.dev\/v1\/ciszejnaosiedlunauczycielskim-2026-7c9f1e\/wsparcie\/';/, 'produkcyjny endpoint odczytu musi kończyć się ukośnikiem');
 assert.match(production, /Math\.max\(current\.value, normalized\)/, 'wartość w cache nie może się cofać');
 assert.match(production, /storeCachedCounter\(event\.data\.value, \{ broadcast: false \}\)/, 'wiadomość z innej karty nie może zostać nadana ponownie');
 assert.match(production, /storePendingSupport\(\);[\s\S]*requestCounter\('\/up'\)/, 'znacznik niejednoznacznego zapisu musi powstać przed żądaniem');
@@ -27,8 +28,8 @@ assert.match(cloudflareTemplate, /requestId: pending\.requestId/, 'ponowienia mu
 assert.match(cloudflareTemplate, /Math\.max\(current\.value, normalized\)/, 'szablon Cloudflare musi zachować monotoniczny cache');
 assert.match(cloudflareTemplate, /storeCachedCount\(event\.data\.value, \{ broadcast: false \}\)/, 'szablon Cloudflare nie może tworzyć pętli BroadcastChannel');
 
-assert.match(html, /assets\/js\/app\.js\?v=39/, 'HTML musi wymuszać pobranie naprawionego skryptu');
-assert.match(html, /<script src="assets\/js\/app\.js\?v=39" defer><\/script>/, 'skrypt musi być ładowany przez defer');
+assert.match(html, /assets\/js\/app\.js\?v=40/, 'HTML musi wymuszać pobranie naprawionego skryptu');
+assert.match(html, /<script src="assets\/js\/app\.js\?v=40" defer><\/script>/, 'skrypt musi być ładowany przez defer');
 assert.equal(occurrences(html, 'id="support-button"'), 1, 'przycisk wsparcia musi mieć unikalny identyfikator');
 assert.equal(occurrences(html, 'id="support-count"'), 1, 'licznik musi mieć unikalny identyfikator');
 assert.match(html, /Aktualnie zbieramy podpisy mieszkańców pod petycją\./, 'strona musi rozróżniać internetowe poparcie od formalnej zbiórki podpisów');

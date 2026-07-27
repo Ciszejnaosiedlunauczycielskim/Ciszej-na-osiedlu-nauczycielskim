@@ -39,7 +39,7 @@ const supportLabel = document.querySelector('#support-label');
 const supportStatus = document.querySelector('#support-status');
 const supportCounter = document.querySelector('.support-counter');
 
-const SUPPORT_API = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie';
+const SUPPORT_API = 'https://api.counterapi.dev/v1/ciszejnaosiedlunauczycielskim-2026-7c9f1e/wsparcie/';
 const SUPPORT_STORAGE_KEY = 'ciszej-wsparcie-zapisane-v1';
 const SUPPORT_STORAGE_KEY_V2 = 'ciszej-wsparcie-zapisane-v2';
 const SUPPORT_COOKIE_NAME = 'ciszej_wsparcie_zapisane';
