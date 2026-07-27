@@ -14,17 +14,12 @@ if (menu && nav) {
     menu.setAttribute('aria-expanded', String(open));
     if (open) nav.querySelector('a')?.focus();
   });
-
   nav.addEventListener('click', event => {
     if (event.target.matches('a')) closeMenu();
   });
-
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && nav.classList.contains('open')) {
-      closeMenu({ returnFocus: true });
-    }
+    if (event.key === 'Escape' && nav.classList.contains('open')) closeMenu({ returnFocus: true });
   });
-
   window.addEventListener('resize', () => {
     if (window.innerWidth > 980 && nav.classList.contains('open')) closeMenu();
   });
@@ -41,37 +36,39 @@ const supportCounter = document.querySelector('.support-counter');
 
 const SUPPORT_API_BASE = '__SUPPORT_API_BASE__';
 const LEGACY_CONFIRMED_KEY = 'ciszej-wsparcie-zapisane-v1';
-const CONFIRMED_KEY = 'ciszej-support-confirmed-v1';
+const CONFIRMED_KEY = 'ciszej-support-confirmed-v2';
 const CONFIRMED_COOKIE = 'ciszej_wsparcie_zapisane';
-const DEVICE_KEY = 'ciszej-support-device-v1';
+const DEVICE_KEY = 'ciszej-support-device-v2';
 const DEVICE_COOKIE = 'ciszej_support_device';
-const PENDING_REQUEST_KEY = 'ciszej-support-pending-request-v1';
-const CACHE_KEY = 'ciszej-wsparcie-licznik-v5';
-const LOCK_KEY = 'ciszej-support-submit-lock-v1';
+const PENDING_REQUEST_KEY = 'ciszej-support-pending-request-v2';
+const CACHE_KEY = 'ciszej-wsparcie-licznik-v7';
+const LOCK_KEY = 'ciszej-support-submit-lock-v2';
+const CHANNEL_NAME = 'ciszej-support-v2';
 const REQUEST_TIMEOUT_MS = 12000;
-const CACHE_MAX_AGE_MS = 60000;
-const READ_RETRY_DELAY_MS = 30000;
-const SUBMIT_RETRY_DELAY_MS = 20000;
+const CACHE_MAX_AGE_MS = 120000;
 const LOCK_MAX_AGE_MS = 30000;
+const READ_RETRY_DELAYS_MS = [30000, 60000, 120000, 300000];
+const SUBMIT_RETRY_DELAYS_MS = [20000, 60000, 180000, 300000];
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 let countRequest = null;
+let submitRequest = null;
 let readRetryTimer = null;
 let submitRetryTimer = null;
+let readFailureCount = 0;
+let submitFailureCount = 0;
 let inMemoryDeviceId = null;
 let inMemoryPendingRequest = null;
 let supportChannel = null;
 
 try {
-  if ('BroadcastChannel' in window) {
-    supportChannel = new BroadcastChannel('ciszej-support-v1');
-  }
+  if ('BroadcastChannel' in window) supportChannel = new BroadcastChannel(CHANNEL_NAME);
 } catch (error) {
   console.warn('[LICZNIK] BroadcastChannel niedostępny.', error);
 }
 
 function logCounter(stage, details = {}) {
-  const method = stage === 'FINAL FAILURE' || stage === 'ERROR'
+  const method = stage === 'ERROR' || stage === 'FINAL FAILURE'
     ? 'error'
     : stage === 'WARNING'
       ? 'warn'
@@ -109,10 +106,8 @@ function storageRemove(key) {
 function readCookie(name) {
   try {
     const prefix = `${name}=`;
-    const match = document.cookie
-      .split('; ')
-      .find(cookie => cookie.startsWith(prefix));
-    return match ? decodeURIComponent(match.slice(prefix.length)) : null;
+    const cookie = document.cookie.split('; ').find(item => item.startsWith(prefix));
+    return cookie ? decodeURIComponent(cookie.slice(prefix.length)) : null;
   } catch (error) {
     logCounter('WARNING', { place: 'cookie.read', name, error });
     return null;
@@ -130,19 +125,15 @@ function writeCookie(name, value, maxAge = 315360000) {
 }
 
 function randomUuid() {
-  if (crypto?.randomUUID) return crypto.randomUUID();
-  if (crypto?.getRandomValues) {
-    return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, digit =>
-      (Number(digit) ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> Number(digit) / 4).toString(16)
-    );
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  if (globalThis.crypto?.getRandomValues) {
+    const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = [...bytes].map(byte => byte.toString(16).padStart(2, '0')).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
   }
-
-  const random = `${Date.now()}-${Math.random()}-${Math.random()}`;
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, character => {
-    const value = Math.floor(Math.random() * 16);
-    const normalized = character === 'x' ? value : (value & 0x3) | 0x8;
-    return normalized.toString(16);
-  }).replace(/^.{8}/, random.slice(-8).replace(/[^0-9a-f]/gi, '0').padStart(8, '0'));
+  throw new Error('Ta przeglądarka nie udostępnia bezpiecznego generatora identyfikatorów.');
 }
 
 function readConfirmedSupport() {
@@ -169,7 +160,6 @@ function getDeviceId() {
   }
 
   if (inMemoryDeviceId && UUID_RE.test(inMemoryDeviceId)) return inMemoryDeviceId;
-
   const deviceId = randomUuid();
   inMemoryDeviceId = deviceId;
   storageSet(DEVICE_KEY, deviceId);
@@ -187,7 +177,6 @@ function readPendingRequest() {
       logCounter('WARNING', { place: 'pending.parse', error });
     }
   }
-
   return inMemoryPendingRequest;
 }
 
@@ -195,10 +184,7 @@ function ensurePendingRequest() {
   const existing = readPendingRequest();
   if (existing?.requestId && UUID_RE.test(existing.requestId)) return existing;
 
-  const pending = {
-    requestId: randomUuid(),
-    createdAt: new Date().toISOString()
-  };
+  const pending = { requestId: randomUuid(), createdAt: new Date().toISOString() };
   inMemoryPendingRequest = pending;
   storageSet(PENDING_REQUEST_KEY, JSON.stringify(pending));
   return pending;
@@ -212,7 +198,6 @@ function clearPendingRequest() {
 function readCachedCount() {
   const raw = storageGet(CACHE_KEY);
   if (!raw) return null;
-
   try {
     const cached = JSON.parse(raw);
     const value = Number(cached?.value);
@@ -225,15 +210,16 @@ function readCachedCount() {
   }
 }
 
-function storeCachedCount(value) {
+function storeCachedCount(value, { broadcast = true } = {}) {
   const normalized = Math.max(0, Math.trunc(Number(value)));
+  if (!Number.isFinite(normalized)) return null;
   const current = readCachedCount();
   const cached = {
     value: current ? Math.max(current.value, normalized) : normalized,
     updatedAt: Date.now()
   };
   storageSet(CACHE_KEY, JSON.stringify(cached));
-  supportChannel?.postMessage({ type: 'counter', ...cached });
+  if (broadcast) supportChannel?.postMessage({ type: 'counter', ...cached });
   return cached.value;
 }
 
@@ -241,7 +227,6 @@ function getSupportLabel(value) {
   const absolute = Math.abs(value);
   const lastDigit = absolute % 10;
   const lastTwoDigits = absolute % 100;
-
   if (absolute === 1) return 'osoba wspiera inicjatywę';
   if (lastDigit >= 2 && lastDigit <= 4 && !(lastTwoDigits >= 12 && lastTwoDigits <= 14)) {
     return 'osoby wspierają inicjatywę';
@@ -269,13 +254,9 @@ function renderLoading() {
 
 function renderUnavailable() {
   const cached = readCachedCount();
-  if (cached) {
-    renderCount(cached.value);
-    return;
-  }
+  if (cached) return renderCount(cached.value);
   if (supportCount) supportCount.textContent = '—';
   if (supportLabel) supportLabel.textContent = 'licznik chwilowo się aktualizuje';
-  supportCounter?.setAttribute('aria-label', 'Aktualizacja licznika chwilowo niedostępna');
 }
 
 function renderSupportedState(message = 'Wsparcie z tego urządzenia zostało już zapisane.') {
@@ -285,25 +266,27 @@ function renderSupportedState(message = 'Wsparcie z tego urządzenia zostało ju
   if (supportStatus) supportStatus.textContent = message;
 }
 
+function renderPendingState(message = 'Wsparcie oczekuje na bezpieczne potwierdzenie serwera.') {
+  if (!supportButton) return;
+  supportButton.disabled = true;
+  supportButton.textContent = 'Oczekuje na zapis';
+  if (supportStatus) supportStatus.textContent = message;
+}
+
 function acquireSubmitLock() {
   const now = Date.now();
   const token = randomUuid();
   const raw = storageGet(LOCK_KEY);
-
   if (raw) {
     try {
       const lock = JSON.parse(raw);
-      if (Number.isFinite(Number(lock?.createdAt)) && now - Number(lock.createdAt) < LOCK_MAX_AGE_MS) {
-        return null;
-      }
+      if (Number.isFinite(Number(lock?.createdAt)) && now - Number(lock.createdAt) < LOCK_MAX_AGE_MS) return null;
     } catch {
-      // Uszkodzony lub stary wpis można nadpisać.
+      // Stary lub uszkodzony wpis można nadpisać.
     }
   }
-
-  const stored = storageSet(LOCK_KEY, JSON.stringify({ token, createdAt: now }));
-  if (!stored) return token;
-
+  const persisted = storageSet(LOCK_KEY, JSON.stringify({ token, createdAt: now }));
+  if (!persisted) return token;
   try {
     const confirmed = JSON.parse(storageGet(LOCK_KEY) || '{}');
     return confirmed.token === token ? token : null;
@@ -327,14 +310,6 @@ function releaseSubmitLock(token) {
 async function fetchJson(url, options = {}) {
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  const externalSignal = options.signal;
-  const abortFromExternal = () => controller.abort();
-
-  if (externalSignal) {
-    if (externalSignal.aborted) controller.abort();
-    else externalSignal.addEventListener('abort', abortFromExternal, { once: true });
-  }
-
   try {
     const response = await fetch(url, {
       ...options,
@@ -343,7 +318,6 @@ async function fetchJson(url, options = {}) {
       credentials: 'omit',
       referrerPolicy: 'no-referrer'
     });
-
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
       const error = new Error(payload?.error || `HTTP ${response.status}`);
@@ -352,25 +326,31 @@ async function fetchJson(url, options = {}) {
       error.retryAfter = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : null;
       throw error;
     }
-
-    if (!payload || typeof payload !== 'object') {
-      throw new Error('Serwer zwrócił nieprawidłową odpowiedź.');
-    }
-
+    if (!payload || typeof payload !== 'object') throw new Error('Serwer zwrócił nieprawidłową odpowiedź.');
     return payload;
   } finally {
     window.clearTimeout(timeoutId);
-    externalSignal?.removeEventListener('abort', abortFromExternal);
   }
 }
 
-function scheduleReadRetry(delay = READ_RETRY_DELAY_MS) {
+function nextDelay(delays, failureCount, error) {
+  const fallback = delays[Math.min(failureCount, delays.length - 1)];
+  return error?.status === 429 && error?.retryAfter
+    ? Math.max(fallback, error.retryAfter * 1000)
+    : fallback;
+}
+
+function scheduleReadRetry(error) {
   window.clearTimeout(readRetryTimer);
+  const delay = nextDelay(READ_RETRY_DELAYS_MS, readFailureCount, error);
+  readFailureCount += 1;
   readRetryTimer = window.setTimeout(() => loadSupportCount({ force: true }), delay);
 }
 
-function scheduleSubmitRetry(delay = SUBMIT_RETRY_DELAY_MS) {
+function scheduleSubmitRetry(error) {
   window.clearTimeout(submitRetryTimer);
+  const delay = nextDelay(SUBMIT_RETRY_DELAYS_MS, submitFailureCount, error);
+  submitFailureCount += 1;
   submitRetryTimer = window.setTimeout(() => {
     if (!readConfirmedSupport() && readPendingRequest() && navigator.onLine !== false) {
       submitSupport({ automatic: true });
@@ -380,19 +360,13 @@ function scheduleSubmitRetry(delay = SUBMIT_RETRY_DELAY_MS) {
 
 async function loadSupportCount({ force = false } = {}) {
   if (!supportCount) return;
-
   const cached = readCachedCount();
   if (cached) renderCount(cached.value);
   if (!force && cached && Date.now() - cached.updatedAt < CACHE_MAX_AGE_MS) return;
-
-  if (navigator.onLine === false) {
-    renderUnavailable();
-    return;
-  }
-
+  if (navigator.onLine === false) return renderUnavailable();
   if (countRequest) return countRequest;
-  renderLoading();
 
+  renderLoading();
   countRequest = (async () => {
     try {
       const payload = await fetchJson(`${SUPPORT_API_BASE}/support/count`, {
@@ -401,48 +375,36 @@ async function loadSupportCount({ force = false } = {}) {
       });
       const serverValue = Number(payload?.value);
       if (!Number.isFinite(serverValue)) throw new Error('Odpowiedź licznika nie zawiera wartości.');
-      const value = storeCachedCount(serverValue);
-      renderCount(value);
-      logCounter('FINAL SUCCESS', { operation: 'load', value, serverValue });
+      const visibleValue = storeCachedCount(serverValue);
+      renderCount(visibleValue);
+      readFailureCount = 0;
+      window.clearTimeout(readRetryTimer);
+      logCounter('FINAL SUCCESS', { operation: 'load', serverValue, visibleValue });
     } catch (error) {
       renderUnavailable();
-      scheduleReadRetry();
-      logCounter('FINAL FAILURE', {
-        operation: 'load',
-        reason: error?.message,
-        stack: error?.stack
-      });
+      scheduleReadRetry(error);
+      logCounter('FINAL FAILURE', { operation: 'load', reason: error?.message, status: error?.status });
     } finally {
       countRequest = null;
     }
   })();
-
   return countRequest;
 }
 
 async function submitSupport({ automatic = false } = {}) {
-  if (!supportButton) return;
-
-  if (readConfirmedSupport()) {
-    renderSupportedState();
-    return;
-  }
+  if (!supportButton || submitRequest) return submitRequest;
+  if (readConfirmedSupport()) return renderSupportedState();
 
   const pending = ensurePendingRequest();
-
   if (navigator.onLine === false) {
-    supportButton.disabled = false;
-    supportButton.textContent = 'Oczekuje na internet';
-    if (supportStatus) {
-      supportStatus.textContent = 'Brak połączenia. Wsparcie zostanie wysłane automatycznie po odzyskaniu internetu.';
-    }
+    renderPendingState('Brak połączenia. To samo zgłoszenie zostanie wysłane po odzyskaniu internetu.');
     return;
   }
 
   const lockToken = acquireSubmitLock();
   if (!lockToken) {
-    if (supportStatus) supportStatus.textContent = 'Wsparcie jest już zapisywane w innej karcie.';
-    if (automatic) scheduleSubmitRetry(2500);
+    renderPendingState('Wsparcie jest już zapisywane w innej karcie.');
+    if (automatic) scheduleSubmitRetry({});
     return;
   }
 
@@ -450,69 +412,59 @@ async function submitSupport({ automatic = false } = {}) {
   supportButton.textContent = automatic ? 'Ponawianie zapisu…' : 'Zapisywanie…';
   if (supportStatus) supportStatus.textContent = '';
 
-  try {
-    const payload = await fetchJson(`${SUPPORT_API_BASE}/support`, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        'X-Support-Device': getDeviceId()
-      },
-      body: JSON.stringify({
+  submitRequest = (async () => {
+    try {
+      const payload = await fetchJson(`${SUPPORT_API_BASE}/support`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-Support-Device': getDeviceId()
+        },
+        body: JSON.stringify({ requestId: pending.requestId, createdAt: pending.createdAt })
+      });
+      const value = Number(payload?.value);
+      if (!Number.isFinite(value)) throw new Error('Odpowiedź zapisu nie zawiera wartości licznika.');
+      storeConfirmedSupport();
+      const visibleValue = storeCachedCount(value);
+      renderCount(visibleValue);
+      renderSupportedState('Dziękujemy. Wsparcie zostało zapisane.');
+      supportChannel?.postMessage({ type: 'supported', value: visibleValue });
+      submitFailureCount = 0;
+      window.clearTimeout(submitRetryTimer);
+      logCounter('FINAL SUCCESS', {
+        operation: 'submit',
+        accepted: Boolean(payload?.accepted),
+        duplicate: Boolean(payload?.duplicate),
         requestId: pending.requestId,
-        createdAt: pending.createdAt
-      })
-    });
-
-    const value = Number(payload?.value);
-    if (!Number.isFinite(value)) throw new Error('Odpowiedź zapisu nie zawiera wartości licznika.');
-
-    storeConfirmedSupport();
-    const visibleValue = storeCachedCount(value);
-    renderCount(visibleValue);
-    renderSupportedState('Dziękujemy. Wsparcie zostało zapisane.');
-    supportChannel?.postMessage({ type: 'supported', value: visibleValue });
-    logCounter('FINAL SUCCESS', {
-      operation: 'submit',
-      accepted: Boolean(payload?.accepted),
-      duplicate: Boolean(payload?.duplicate),
-      value: visibleValue,
-      requestId: pending.requestId
-    });
-  } catch (error) {
-    const retryable = !error?.status || error.status === 429 || error.status >= 500 || error?.name === 'AbortError';
-
-    if (retryable) {
-      const delay = error?.status === 429 && error?.retryAfter
-        ? Math.max(SUBMIT_RETRY_DELAY_MS, error.retryAfter * 1000)
-        : SUBMIT_RETRY_DELAY_MS;
-      supportButton.disabled = false;
-      supportButton.textContent = 'Oczekuje na zapis';
-      if (supportStatus) {
-        supportStatus.textContent = 'Nie udało się potwierdzić zapisu. To samo zgłoszenie zostanie bezpiecznie ponowione.';
+        value: visibleValue
+      });
+    } catch (error) {
+      const retryable = !error?.status || error.status === 408 || error.status === 429 || error.status >= 500;
+      if (retryable) {
+        renderPendingState('Nie udało się potwierdzić zapisu. To samo zgłoszenie zostanie bezpiecznie ponowione.');
+        scheduleSubmitRetry(error);
+      } else {
+        clearPendingRequest();
+        supportButton.disabled = false;
+        supportButton.textContent = 'Spróbuj ponownie';
+        if (supportStatus) supportStatus.textContent = 'Serwer odrzucił zapis. Odśwież stronę i spróbuj ponownie.';
       }
-      scheduleSubmitRetry(delay);
-    } else {
-      clearPendingRequest();
-      supportButton.disabled = false;
-      supportButton.textContent = 'Spróbuj ponownie';
-      if (supportStatus) {
-        supportStatus.textContent = 'Nie udało się zapisać wsparcia. Odśwież stronę i spróbuj ponownie.';
-      }
+      window.setTimeout(() => loadSupportCount({ force: true }), 1500);
+      logCounter('FINAL FAILURE', {
+        operation: 'submit',
+        retryable,
+        reason: error?.message,
+        status: error?.status,
+        requestId: pending.requestId
+      });
+    } finally {
+      releaseSubmitLock(lockToken);
+      submitRequest = null;
     }
+  })();
 
-    window.setTimeout(() => loadSupportCount({ force: true }), 1500);
-    logCounter('FINAL FAILURE', {
-      operation: 'submit',
-      retryable,
-      reason: error?.message,
-      status: error?.status,
-      requestId: pending.requestId,
-      stack: error?.stack
-    });
-  } finally {
-    releaseSubmitLock(lockToken);
-  }
+  return submitRequest;
 }
 
 if (supportButton && supportCount) {
@@ -521,6 +473,7 @@ if (supportButton && supportCount) {
   else renderLoading();
 
   if (readConfirmedSupport()) renderSupportedState();
+  else if (readPendingRequest()) renderPendingState();
 
   supportButton.addEventListener('click', () => submitSupport());
   loadSupportCount();
@@ -531,15 +484,11 @@ if (supportButton && supportCount) {
 
   window.addEventListener('online', () => {
     loadSupportCount({ force: true });
-    if (!readConfirmedSupport() && readPendingRequest()) {
-      submitSupport({ automatic: true });
-    }
+    if (!readConfirmedSupport() && readPendingRequest()) submitSupport({ automatic: true });
   });
 
   window.addEventListener('offline', () => {
-    if (supportStatus && !readConfirmedSupport()) {
-      supportStatus.textContent = 'Brak połączenia z internetem.';
-    }
+    if (supportStatus && !readConfirmedSupport()) supportStatus.textContent = 'Brak połączenia z internetem.';
   });
 
   window.addEventListener('storage', event => {
@@ -547,7 +496,6 @@ if (supportButton && supportCount) {
       const latest = readCachedCount();
       if (latest) renderCount(latest.value);
     }
-
     if ((event.key === LEGACY_CONFIRMED_KEY || event.key === CONFIRMED_KEY) && event.newValue === '1') {
       renderSupportedState();
     }
@@ -555,7 +503,8 @@ if (supportButton && supportCount) {
 
   supportChannel?.addEventListener('message', event => {
     if (event.data?.type === 'counter' && Number.isFinite(Number(event.data.value))) {
-      renderCount(storeCachedCount(event.data.value));
+      const visibleValue = storeCachedCount(event.data.value, { broadcast: false });
+      renderCount(visibleValue);
     }
     if (event.data?.type === 'supported') {
       storeConfirmedSupport();
@@ -566,13 +515,13 @@ if (supportButton && supportCount) {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible') return;
     const latest = readCachedCount();
-    if (!latest || Date.now() - latest.updatedAt >= CACHE_MAX_AGE_MS) {
-      loadSupportCount({ force: true });
-    }
+    if (!latest || Date.now() - latest.updatedAt >= CACHE_MAX_AGE_MS) loadSupportCount({ force: true });
     if (!readConfirmedSupport() && readPendingRequest() && navigator.onLine !== false) {
       submitSupport({ automatic: true });
     }
   });
+
+  window.addEventListener('pagehide', () => supportChannel?.close(), { once: true });
 }
 
 const shareButton = document.querySelector('#share-button');
@@ -584,14 +533,9 @@ if (shareButton) {
     text: 'Poznaj historię pomiarów hałasu przy Osiedlu Nauczycielskim w Tarnowie i poprzyj na stronie inicjatywę mieszkańców osiedla dotyczącą wykonania aktualnych pomiarów oraz wdrożenia zabezpieczeń przed hałasem.',
     url: 'https://ciszejnaosiedlunauczycielskim.pl/'
   };
-
   shareButton.addEventListener('click', async () => {
     try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-        return;
-      }
-
+      if (navigator.share) return navigator.share(shareData);
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(shareData.url);
         const originalLabel = shareButton.textContent;
@@ -603,12 +547,9 @@ if (shareButton) {
         }, 2200);
         return;
       }
-
       window.prompt('Skopiuj link do petycji:', shareData.url);
     } catch (error) {
-      if (error?.name !== 'AbortError') {
-        console.error('Nie udało się udostępnić petycji.', error);
-      }
+      if (error?.name !== 'AbortError') console.error('Nie udało się udostępnić petycji.', error);
     }
   });
 }
