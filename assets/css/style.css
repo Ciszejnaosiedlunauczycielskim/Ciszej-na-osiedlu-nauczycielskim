@@ -33,6 +33,13 @@ nav a,.back-link{font-size:.91rem;font-weight:760;text-decoration:none}
 nav a:hover,.back-link:hover{color:var(--red)}
 #menu{display:none;min-height:44px;padding:.5rem .75rem;border:1px solid var(--line);border-radius:.65rem;background:#fff;color:var(--ink);font-weight:800}
 
+.updates-banner{display:block;background:var(--red);color:#fff;text-decoration:none}
+.updates-banner:hover{background:var(--red-dark)}
+.updates-banner:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+.updates-banner-inner{display:flex;min-height:46px;align-items:center;justify-content:center;gap:.75rem;text-align:center;font-size:.93rem;line-height:1.25}
+.updates-banner-inner strong{font-weight:900}
+.updates-banner-inner span:last-child{font-size:1.15rem;font-weight:900}
+
 h1,h2,h3,p{overflow-wrap:break-word}
 h1,h2,h3{margin-top:0;letter-spacing:-.035em}
 h1{max-width:900px;margin-bottom:1.1rem;font-size:clamp(2.65rem,6vw,4.65rem);line-height:1.01}
@@ -199,6 +206,8 @@ footer{background:#0b171d;color:#b7c2c7}
   body{font-size:17px}
   .wrap{width:min(calc(100% - 1.25rem),var(--max))}
   .nav{min-height:66px}
+  .updates-banner-inner{min-height:44px;gap:.5rem;font-size:.86rem}
+  .updates-banner-inner strong{display:none}
   .brand b{font-size:1.25rem}
   .brand span{font-size:.69rem}
   .section{padding:3.5rem 0}
