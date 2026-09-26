@@ -31,32 +31,33 @@ REQUIRED_FILES = [
 REQUIRED_HOME_IDS = {
     "top",
     "status",
-    "dalej",
-    "miejsce",
+    "dlaczego",
     "historia",
-    "dane",
-    "inwestycje",
     "aktualnosci",
-    "dokumenty",
-    "udostepnij",
+    "szczegoly",
     "kontakt",
 }
 REQUIRED_HOME_FRAGMENTS = [
-    'class="hero hero-current hero-wireframe"',
-    'class="section status-section status-wireframe"',
-    'class="status-facts status-facts-wireframe"',
-    'class="status-unknown"',
-    'class="process-grid"',
+    'class="home-hero"',
+    'class="case-timeline"',
+    'class="status-conclusion"',
+    'class="wrap home-why-layout"',
+    'class="case-history"',
+    'class="home-news-item"',
+    'class="home-link-list"',
     'href="dane.html"',
     'href="inwestycje.html"',
     'href="aktualnosci.html"',
+    'href="zrodla.html"',
+    'href="media.html"',
 ]
-FORBIDDEN_FIRST_TWO_SCREENS = [
-    "PUBLICZNA ZAPOWIEDŹ",
-    "Publiczna zapowiedź",
-    "DO USTALENIA",
-    "Do ustalenia",
-    "status-badge",
+FORBIDDEN_HOME_FRAGMENTS = [
+    'class="process-grid"',
+    'class="status-badge"',
+    'class="milestone-grid"',
+    'class="context-teaser-grid"',
+    'class="resource-grid"',
+    'class="news-card',
 ]
 FORBIDDEN_TEXT = [
     "counterapi.dev",
@@ -182,28 +183,29 @@ def check_page(page: Path) -> list[str]:
             if fragment not in content:
                 errors.append(f"{page.name}: brakuje wymaganego elementu: {fragment}")
 
-        first_two_end = content.find('id="dalej"')
-        first_two = content[:first_two_end] if first_two_end != -1 else content
-        for fragment in FORBIDDEN_FIRST_TWO_SCREENS:
-            if fragment in first_two:
-                errors.append(f"{page.name}: w pierwszych dwóch ekranach występuje niepożądany element: {fragment}")
+        for fragment in FORBIDDEN_HOME_FRAGMENTS:
+            if fragment in content:
+                errors.append(f"{page.name}: strona główna zawiera stary, niepożądany element: {fragment}")
 
-        if "<ul" in first_two:
-            errors.append(f"{page.name}: pierwsze dwa ekrany nie powinny zawierać listy punktowanej")
+        if content.count('class="home-news-item"') != 1:
+            errors.append(f"{page.name}: na stronie głównej powinna być dokładnie jedna główna aktualność")
 
-        if content.count('<article class="news-card') != 3:
-            errors.append(f"{page.name}: na stronie głównej powinny być dokładnie 3 aktualności")
+        if content.count("<h1") != 1:
+            errors.append(f"{page.name}: strona główna powinna mieć jeden H1")
 
         for required_text in (
             "Badania hałasu zostały zapowiedziane",
             "Teraz liczy się ich zakres.",
+            "Na jakim jesteśmy etapie?",
             "11.09.2026",
-            ">159<",
-            "Czego jeszcze nie wiemy",
-            "Co dalej ↓",
+            "159 podpisów",
+            "Dopiero jego wyniki pokażą, czy i jakie zabezpieczenia są potrzebne.",
+            "Dlaczego potrzebny jest aktualny pomiar?",
+            "Nie przesądzamy wyniku. Nie przesądzamy rozwiązania. Najpierw dane.",
+            "Szczegóły są na osobnych podstronach",
         ):
             if required_text not in content:
-                errors.append(f"{page.name}: brakuje zatwierdzonego elementu wireframe: {required_text}")
+                errors.append(f"{page.name}: brakuje wymaganego tekstu strony głównej: {required_text}")
 
     lowered = content.lower()
     for phrase in FORBIDDEN_TEXT:
@@ -249,10 +251,12 @@ def check_css() -> list[str]:
     for required in (
         "@media(max-width:980px)",
         "@media(max-width:700px)",
-        ".hero-wireframe",
-        ".status-wireframe",
-        ".status-facts-wireframe",
-        ".process-grid",
+        ".home-v3 .home-hero",
+        ".case-timeline",
+        ".status-conclusion",
+        ".home-why-layout",
+        ".case-history",
+        ".home-link-list",
     ):
         if required not in css:
             errors.append(f"assets/css/style.css: brakuje reguły {required}")
