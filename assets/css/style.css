@@ -799,9 +799,12 @@ footer{background:#0b171d;color:#b7c2c7}
   background:#fff;
 }
 .home-context-image img{
+  display:block;
   width:100%;
-  aspect-ratio:16/9;
-  object-fit:cover;
+  height:auto;
+  max-height:none;
+  aspect-ratio:auto;
+  object-fit:contain;
   border-radius:.55rem;
 }
 .home-context-image figcaption{
