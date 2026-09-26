@@ -194,14 +194,14 @@ def check_page(page: Path) -> list[str]:
             errors.append(f"{page.name}: strona główna powinna mieć jeden H1")
 
         for required_text in (
-            "Badania hałasu zostały zapowiedziane",
-            "Teraz liczy się ich zakres.",
+            "Ta część miasta się rozwija",
+            "Pomiary hałasu muszą za tym nadążyć.",
             "Na jakim jesteśmy etapie?",
             "11.09.2026",
             "159 podpisów",
-            "Dopiero jego wyniki pokażą, czy i jakie zabezpieczenia są potrzebne.",
-            "Dlaczego potrzebny jest aktualny pomiar?",
-            "Nie przesądzamy wyniku. Nie przesądzamy rozwiązania. Najpierw dane.",
+            "Najpierw rzetelny pomiar przy domach.",
+            "Dlaczego pomiar jest dziś potrzebny?",
+            "Rozwój miasta tak. Aktualne pomiary i odpowiednie zabezpieczenia też.",
             "Szczegóły są na osobnych podstronach",
         ):
             if required_text not in content:
