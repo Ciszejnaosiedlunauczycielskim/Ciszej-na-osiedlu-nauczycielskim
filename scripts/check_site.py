@@ -70,6 +70,8 @@ FORBIDDEN_TEXT = [
     "opieramy opis sprawy",
     "nie przedstawiamy tego",
     "nie publikujemy pozornego linku",
+    "nie publikujemy pełnej wiadomości",
+    "na stronie publikujemy",
 ]
 
 
