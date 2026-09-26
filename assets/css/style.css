@@ -670,3 +670,10 @@ footer{background:#0b171d;color:#b7c2c7}
   .status-facts-wireframe{grid-template-columns:1fr 1fr}
   .home-v2 .hero-wireframe h1{font-size:2rem}
 }
+
+
+/* QA 2026-09-26: tighter transition between status and next step on mobile */
+@media(max-width:700px){
+  .status-wireframe{padding:1.8rem 0 1.25rem}
+  .next-compact{padding-top:1.75rem}
+}
