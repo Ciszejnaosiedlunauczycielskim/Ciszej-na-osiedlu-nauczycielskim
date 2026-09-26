@@ -39,7 +39,7 @@ const shareStatus = document.querySelector('#share-status');
 if (shareButton) {
   const shareData = {
     title: 'Ciszej na Osiedlu Nauczycielskim',
-    text: 'Poznaj historię pomiarów hałasu przy Osiedlu Nauczycielskim w Tarnowie i poprzyj na stronie inicjatywę mieszkańców osiedla dotyczącą wykonania aktualnych pomiarów oraz wdrożenia zabezpieczeń przed hałasem.',
+    text: 'Poznaj udokumentowaną historię sprawy hałasu na Osiedlu Nauczycielskim w Tarnowie. Mieszkańcy oczekują aktualnych pomiarów przy zabudowie, oceny łącznego wpływu DK94 i Lwowskiej/DK73 oraz działań adekwatnych do wyników.',
     url: 'https://ciszejnaosiedlunauczycielskim.pl/'
   };
 
@@ -62,10 +62,10 @@ if (shareButton) {
         return;
       }
 
-      window.prompt('Skopiuj link do petycji:', shareData.url);
+      window.prompt('Skopiuj link do strony:', shareData.url);
     } catch (error) {
       if (error?.name !== 'AbortError') {
-        console.error('Nie udało się udostępnić petycji.', error);
+        console.error('Nie udało się udostępnić strony.', error);
       }
     }
   });
