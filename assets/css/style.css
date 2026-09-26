@@ -220,6 +220,15 @@ footer{background:#0b171d;color:#b7c2c7}
 .data-type.investment{background:#f1e9ea;color:var(--red)}
 .data-conclusion{max-width:980px;margin:1.2rem 0 0;padding:1.15rem 1.2rem;border-left:4px solid var(--red);background:var(--soft)}
 
+/* Grupy źródeł */
+.source-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin-top:1.2rem}
+.source-group{padding:1.15rem;border:1px solid var(--line);border-radius:.8rem;background:#fff}
+.source-group h3{margin:0 0 .75rem;font-size:1.15rem}
+.source-group p{margin:.55rem 0;color:var(--muted)}
+.source-group p:first-of-type{margin-top:0}
+.source-group p:last-child{margin-bottom:0}
+.source-links span{color:var(--muted);line-height:1.5}
+
 /* Inwestycje i kumulacja */
 .known-unknown{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
 .known-unknown>div{padding:1.1rem;border:1px solid var(--line);border-radius:.75rem;background:#fff}
@@ -241,6 +250,7 @@ footer{background:#0b171d;color:#b7c2c7}
   .two-col,.next-layout,.document-layout{grid-template-columns:1fr;gap:.7rem}
   .status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .data-grid{grid-template-columns:1fr}
+  .source-groups{grid-template-columns:1fr}
   .known-unknown{grid-template-columns:1fr}
   .cumulative-box{grid-template-columns:1fr}
   .cumulative-box p{grid-column:1}
