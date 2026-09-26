@@ -16,20 +16,18 @@ jobs:
       - name: Pobierz repozytorium
         uses: actions/checkout@v4
 
+      - name: Ustaw Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Ustaw Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
+
+      - name: Pełna kontrola struktury strony
+        run: python scripts/check_site.py
 
       - name: Sprawdź składnię JavaScript
         run: node --check assets/js/app.js
-
-      - name: Sprawdź podstawowe elementy strony
-        run: |
-          grep -q 'id="status"' index.html
-          grep -q 'id="historia"' index.html
-          grep -q 'id="dane"' index.html
-          grep -q 'id="inwestycje"' index.html
-          grep -q 'id="dalej"' index.html
-          grep -q '159 podpisów' index.html
-          test "$(grep -o '<h1' index.html | wc -l)" -eq 1
