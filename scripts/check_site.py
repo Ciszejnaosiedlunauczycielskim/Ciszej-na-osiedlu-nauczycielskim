@@ -5,7 +5,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
-HTML_FILES = [ROOT / "index.html", ROOT / "historia-sprawy.html"]
+HTML_FILES = [ROOT / "index.html", ROOT / "historia-sprawy.html", ROOT / "zrodla.html", ROOT / "media.html"]
 REQUIRED_FILES = [
     ROOT / "assets/img/WIDOK NA OSIEDLE W KLINIE.jpeg",
     ROOT / "assets/img/WIDOK NA BRAK PANELI.jpeg",
