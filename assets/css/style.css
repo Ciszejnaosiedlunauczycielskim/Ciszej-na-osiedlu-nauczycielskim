@@ -460,3 +460,7 @@ footer{background:#0b171d;color:#b7c2c7}
   .support-inner-simple .btn{width:100%}
   .home-v2 .contact{padding:3rem 0}
 }
+
+.news-content h2{margin-bottom:.6rem;font-size:1.45rem;line-height:1.25}
+.context-item h2{margin-bottom:.65rem;font-size:1.45rem;line-height:1.25}
+.known-unknown h3{margin:0 0 .55rem;color:var(--red);font-size:1rem;letter-spacing:0}
