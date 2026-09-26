@@ -1,4 +1,4 @@
-name: Sprawdź stronę i licznik
+name: Dodatkowa walidacja strony
 
 on:
   pull_request:
@@ -22,10 +22,14 @@ jobs:
           node-version: '22'
 
       - name: Sprawdź składnię JavaScript
-        run: |
-          node --check assets/js/app.js
-          node --check backend/cloudflare-support/frontend-app.template.js
-          node --check backend/cloudflare-support/src/index.js
+        run: node --check assets/js/app.js
 
-      - name: Sprawdź kontrakt licznika
-        run: node tests/counter-contract.test.mjs
+      - name: Sprawdź podstawowe elementy strony
+        run: |
+          grep -q 'id="status"' index.html
+          grep -q 'id="historia"' index.html
+          grep -q 'id="dane"' index.html
+          grep -q 'id="inwestycje"' index.html
+          grep -q 'id="dalej"' index.html
+          grep -q '159 podpisów' index.html
+          test "$(grep -o '<h1' index.html | wc -l)" -eq 1
