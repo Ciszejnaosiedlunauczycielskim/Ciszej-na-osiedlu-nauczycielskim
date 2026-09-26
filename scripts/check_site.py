@@ -12,7 +12,7 @@ REQUIRED_FILES = [
     ROOT / "assets/img/MAPA MIASTA I OSIEDLA.png",
     ROOT / "documents/petycja-osiedle-nauczycielskie-wersja-publiczna.pdf",
 ]
-REQUIRED_HOME_IDS = {"top", "miejsce", "mapa", "historia", "teraz", "dalej", "dokumenty"}
+REQUIRED_HOME_IDS = {"top", "status", "miejsce", "mapa", "historia", "dane", "inwestycje", "dalej", "aktualnosci", "dokumenty", "kontakt"}
 FORBIDDEN_TEXT = [
     "chcemy znaleźć pieniądze",
     "planowanego panelu o długości około 296 metrów nie ma na tym odcinku",
@@ -33,7 +33,9 @@ FORBIDDEN_HOME_FRAGMENTS = [
 REQUIRED_HOME_FRAGMENTS = [
     "map-layout",
     "map-detail-crop",
-    "Planowana jednostka wojskowa w Tarnowie",
+    "status-grid",
+    "data-grid",
+    "cumulative-box",
 ]
 
 
