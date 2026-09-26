@@ -62,6 +62,7 @@ FORBIDDEN_TEXT = [
     "counterapi.dev",
     "nadałem listy",
     "złożyliśmy petycję",
+    "mieszancom-osiedla-nauczycielskiego",
 ]
 
 
