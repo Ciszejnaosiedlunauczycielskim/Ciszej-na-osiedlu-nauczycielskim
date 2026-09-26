@@ -39,7 +39,7 @@ const shareStatus = document.querySelector('#share-status');
 if (shareButton) {
   const shareData = {
     title: 'Ciszej na Osiedlu Nauczycielskim',
-    text: 'Poznaj udokumentowaną historię sprawy hałasu na Osiedlu Nauczycielskim w Tarnowie. Mieszkańcy oczekują aktualnych pomiarów przy zabudowie, oceny łącznego wpływu DK94 i Lwowskiej/DK73 oraz działań adekwatnych do wyników.',
+    text: 'Sprawdź aktualny stan sprawy hałasu na Osiedlu Nauczycielskim w Tarnowie. Po petycji podpisanej przez 159 mieszkańców ZDiK publicznie zapowiedział badania; nadal czekamy na ich dokładny zakres.',
     url: 'https://ciszejnaosiedlunauczycielskim.pl/'
   };
 
