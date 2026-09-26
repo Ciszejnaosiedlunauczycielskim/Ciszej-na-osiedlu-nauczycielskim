@@ -30,21 +30,25 @@ REQUIRED_FILES = [
 ]
 REQUIRED_HOME_IDS = {
     "top",
+    "o-co-chodzi",
+    "co-wiemy",
+    "czego-chcemy",
     "status",
-    "dlaczego",
     "historia",
     "aktualnosci",
-    "szczegoly",
+    "dane",
+    "inwestycje",
+    "dokumenty",
     "kontakt",
 }
 REQUIRED_HOME_FRAGMENTS = [
-    'class="home-hero"',
-    'class="case-timeline"',
-    'class="status-conclusion"',
-    'class="wrap home-why-layout"',
-    'class="case-history"',
-    'class="home-news-item"',
-    'class="home-link-list"',
+    'class="human-hero"',
+    'class="human-statement"',
+    'class="human-fact-list"',
+    'class="human-ask-list"',
+    'class="human-place-grid"',
+    'class="human-progress-list"',
+    'class="human-link-grid"',
     'href="dane.html"',
     'href="inwestycje.html"',
     'href="aktualnosci.html"',
@@ -187,22 +191,18 @@ def check_page(page: Path) -> list[str]:
             if fragment in content:
                 errors.append(f"{page.name}: strona główna zawiera stary, niepożądany element: {fragment}")
 
-        if content.count('class="home-news-item"') != 1:
-            errors.append(f"{page.name}: na stronie głównej powinna być dokładnie jedna główna aktualność")
-
         if content.count("<h1") != 1:
             errors.append(f"{page.name}: strona główna powinna mieć jeden H1")
 
         for required_text in (
-            "Ta część miasta się rozwija",
-            "Pomiary hałasu muszą za tym nadążyć.",
-            "Na jakim jesteśmy etapie?",
-            "11.09.2026",
-            "159 podpisów",
-            "Najpierw rzetelny pomiar przy domach.",
-            "Dlaczego pomiar jest dziś potrzebny?",
-            "Rozwój miasta tak. Aktualne pomiary i odpowiednie zabezpieczenia też.",
-            "Szczegóły są na osobnych podstronach",
+            "Chcemy wiedzieć, jaki hałas naprawdę dociera do naszych domów.",
+            "I na tej podstawie zdecydować, jak je chronić.",
+            "Problem jest prosty: brakuje aktualnego pomiaru przy domach.",
+            "Nie chcemy zgadywać. Chcemy zmierzyć.",
+            "Trzech rzeczy. W tej kolejności.",
+            "159 mieszkańców",
+            "Sprawa ruszyła. Teraz trzeba dopilnować badań.",
+            "Nie trzeba wierzyć opisowi tej strony.",
         ):
             if required_text not in content:
                 errors.append(f"{page.name}: brakuje wymaganego tekstu strony głównej: {required_text}")
@@ -251,12 +251,13 @@ def check_css() -> list[str]:
     for required in (
         "@media(max-width:980px)",
         "@media(max-width:700px)",
-        ".home-v3 .home-hero",
-        ".case-timeline",
-        ".status-conclusion",
-        ".home-why-layout",
-        ".case-history",
-        ".home-link-list",
+        ".home-human .human-hero",
+        ".human-statement",
+        ".human-fact-list",
+        ".human-ask-list",
+        ".human-place-grid",
+        ".human-progress-list",
+        ".human-link-grid",
     ):
         if required not in css:
             errors.append(f"assets/css/style.css: brakuje reguły {required}")
