@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from html.parser import HTMLParser
 from pathlib import Path
+import re
 from urllib.parse import unquote, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -63,6 +64,14 @@ FORBIDDEN_TEXT = [
     "nadałem listy",
     "złożyliśmy petycję",
     "mieszancom-osiedla-nauczycielskiego",
+    "naszej sprawie",
+    "nie odnaleźliśmy",
+    "posiadamy wyciąg",
+    "opieramy opis sprawy",
+    "nie przedstawiamy tego",
+    "nie publikujemy pozornego linku",
+    "nie publikujemy pełnej wiadomości",
+    "na stronie publikujemy",
 ]
 
 
@@ -70,6 +79,7 @@ class PageParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
         self.h1_count = 0
+        self.heading_levels: list[int] = []
         self.ids: list[str] = []
         self.refs: list[str] = []
         self.images: list[dict[str, str | None]] = []
@@ -82,6 +92,8 @@ class PageParser(HTMLParser):
         values = dict(attrs)
         if tag == "h1":
             self.h1_count += 1
+        if re.fullmatch(r"h[1-6]", tag):
+            self.heading_levels.append(int(tag[1]))
         if values.get("id"):
             self.ids.append(values["id"] or "")
         for attr in ("href", "src"):
@@ -157,6 +169,10 @@ def check_page(page: Path) -> list[str]:
     if parser.h1_count != 1:
         errors.append(f"{page.name}: oczekiwano jednego H1, znaleziono {parser.h1_count}")
 
+    for previous, current in zip(parser.heading_levels, parser.heading_levels[1:]):
+        if current > previous + 1:
+            errors.append(f"{page.name}: nielogiczny skok nagłówka H{previous} → H{current}")
+
     duplicate_ids = sorted({x for x in parser.ids if parser.ids.count(x) > 1})
     if duplicate_ids:
         errors.append(f"{page.name}: zduplikowane id: {', '.join(duplicate_ids)}")
@@ -190,6 +206,10 @@ def check_page(page: Path) -> list[str]:
 
         if "<ul" in first_two:
             errors.append(f"{page.name}: pierwsze dwa ekrany nie powinny zawierać listy punktowanej")
+
+        for redundant in ('<span class="status-badge">Dokumenty</span>', '<span class="status-badge">Media</span>'):
+            if redundant in content:
+                errors.append(f"{page.name}: redundantna etykieta powtarza nagłówek karty: {redundant}")
 
         if content.count('<article class="news-card') != 3:
             errors.append(f"{page.name}: na stronie głównej powinny być dokładnie 3 aktualności")
@@ -259,6 +279,23 @@ def check_css() -> list[str]:
     return errors
 
 
+def check_stylesheet_versions() -> list[str]:
+    errors: list[str] = []
+    versions: dict[str, str] = {}
+    for page in HTML_FILES:
+        content = page.read_text(encoding="utf-8")
+        match = re.search(r'assets/css/style\.css\?v=(\d+)', content)
+        if not match:
+            errors.append(f"{page.name}: brak wersjonowanego odnośnika do style.css")
+            continue
+        versions[page.name] = match.group(1)
+
+    if len(set(versions.values())) > 1:
+        details = ", ".join(f"{name}=v{version}" for name, version in sorted(versions.items()))
+        errors.append(f"Niespójne wersje style.css: {details}")
+    return errors
+
+
 def check_sitemap() -> list[str]:
     errors: list[str] = []
     content = (ROOT / "sitemap.xml").read_text(encoding="utf-8")
@@ -283,6 +320,7 @@ def main() -> None:
         errors.extend(check_page(page))
 
     errors.extend(check_css())
+    errors.extend(check_stylesheet_versions())
     errors.extend(check_sitemap())
 
     app_js = (ROOT / "assets/js/app.js").read_text(encoding="utf-8")
