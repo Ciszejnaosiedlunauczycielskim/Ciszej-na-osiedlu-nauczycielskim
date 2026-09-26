@@ -412,7 +412,7 @@ footer{background:#0b171d;color:#b7c2c7}
 .resources{background:var(--warm)}
 .resource-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 .resource-card{padding:1.25rem;border:1px solid #ddd4cf;border-radius:.85rem;background:#fff}
-.resource-card h3{margin:.55rem 0 .5rem}
+.resource-card h3{margin:0 0 .5rem}
 .resource-card p{color:var(--muted)}
 .support-inner-simple{display:block}
 .support-inner-simple .support-action{display:flex;align-items:center;justify-content:space-between;gap:2rem}
