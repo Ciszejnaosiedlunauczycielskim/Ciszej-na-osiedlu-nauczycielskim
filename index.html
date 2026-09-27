@@ -32,16 +32,18 @@
 
   <header class="site-header">
     <div class="wrap nav">
-      <a class="brand" href="#top" aria-label="Ciszej na Osiedlu Nauczycielskim — strona główna">
+      <a class="brand" href="./" aria-label="Ciszej na Osiedlu Nauczycielskim — strona główna">
         <b>Ciszej</b>
         <span>na Osiedlu Nauczycielskim</span>
       </a>
       <button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
       <nav id="nav" aria-label="Główna nawigacja">
-        <a href="#o-co-chodzi">O co chodzi</a>
-        <a href="#co-wiemy">Co wiemy</a>
-        <a href="#czego-chcemy">Czego chcemy</a>
-        <a href="#status">Co teraz</a>
+        <a href="./" aria-current="page">Start</a>
+        <a href="historia-sprawy.html">Historia</a>
+        <a href="dane.html">Dane</a>
+        <a href="inwestycje.html">Otoczenie</a>
+        <a href="aktualnosci.html">Aktualności</a>
+        <a href="media.html">Media</a>
         <a href="zrodla.html">Dokumenty</a>
       </nav>
     </div>
@@ -221,13 +223,28 @@
     </section>
   </main>
 
-  <footer>
-    <div class="wrap footer-row">
+  <footer class="site-footer">
+    <div class="wrap corporate-footer">
+      <div class="footer-identity">
+        <strong>Ciszej na Osiedlu Nauczycielskim</strong>
+        <span>Strona informacyjna mieszkańców Osiedla Nauczycielskiego w Tarnowie</span>
+      </div>
+      <nav class="footer-nav" aria-label="Nawigacja w stopce">
+        <a href="historia-sprawy.html">Historia</a>
+        <a href="dane.html">Dane</a>
+        <a href="inwestycje.html">Otoczenie</a>
+        <a href="aktualnosci.html">Aktualności</a>
+        <a href="media.html">Media</a>
+        <a href="zrodla.html">Dokumenty</a>
+      </nav>
+      <a class="footer-contact" href="mailto:ciszejnaosiedlunauczycielskim@gmail.com">Kontakt</a>
+    </div>
+    <div class="wrap footer-meta">
       <span>© <span id="year"></span> Ciszej na Osiedlu Nauczycielskim</span>
-      <a href="mailto:ciszejnaosiedlunauczycielskim@gmail.com">ciszejnaosiedlunauczycielskim@gmail.com</a>
+      <span>Opis sprawy opieramy na wskazanych dokumentach i źródłach.</span>
     </div>
   </footer>
 
-  <script src="assets/js/app.js?v=42" defer></script>
+  <script src="assets/js/app.js?v=43" defer></script>
 </body>
 </html>
