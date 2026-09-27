@@ -207,6 +207,7 @@ def check_page(page: Path) -> list[str]:
             "Nie chcemy zgadywać. Chcemy zmierzyć.",
             "Trzech rzeczy. W tej kolejności.",
             "11 września 159 mieszkańców",
+            "Miasto wskazuje: najpierw badania akustyczne",
             "Sprawa ruszyła. Teraz liczy się zakres badań.",
             "Każdy może sprawdzić dokumenty",
         ):
