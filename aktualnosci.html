@@ -7,15 +7,35 @@
   <title>Aktualności — Ciszej na Osiedlu Nauczycielskim</title>
   <meta name="description" content="Archiwum aktualności dotyczących petycji mieszkańców, publikacji medialnych i kolejnych działań w sprawie hałasu na Osiedlu Nauczycielskim.">
   <link rel="canonical" href="https://ciszejnaosiedlunauczycielskim.pl/aktualnosci.html">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pl_PL">
+  <meta property="og:site_name" content="Ciszej na Osiedlu Nauczycielskim">
+  <meta property="og:title" content="Aktualności — Ciszej na Osiedlu Nauczycielskim">
+  <meta property="og:description" content="Najważniejsze działania mieszkańców, publikacje medialne i informacje dotyczące zapowiedzianych badań hałasu.">
+  <meta property="og:url" content="https://ciszejnaosiedlunauczycielskim.pl/aktualnosci.html">
+  <meta property="og:image" content="https://ciszejnaosiedlunauczycielskim.pl/assets/img/WIDOK%20NA%20OSIEDLE%20W%20KLINIE.jpeg">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/style.css?v=79">
+  <link rel="stylesheet" href="assets/css/style.css?v=80">
 </head>
 <body>
   <a class="skip" href="#main">Przejdź do treści</a>
   <header class="site-header">
     <div class="wrap nav">
-      <a class="brand" href="./"><b>Ciszej</b><span>na Osiedlu Nauczycielskim</span></a>
-      <a class="back-link" href="./#aktualnosci">← Strona główna</a>
+      <a class="brand" href="./" aria-label="Ciszej na Osiedlu Nauczycielskim — strona główna">
+        <b>Ciszej</b>
+        <span>na Osiedlu Nauczycielskim</span>
+      </a>
+      <button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+      <nav id="nav" aria-label="Główna nawigacja">
+        <a href="./">Start</a>
+        <a href="historia-sprawy.html">Historia</a>
+        <a href="dane.html">Dane</a>
+        <a href="inwestycje.html">Otoczenie</a>
+        <a href="aktualnosci.html" aria-current="page">Aktualności</a>
+        <a href="media.html">Media</a>
+        <a href="zrodla.html">Dokumenty</a>
+      </nav>
     </div>
   </header>
 
@@ -35,7 +55,7 @@
             <time datetime="2026-09-25">25 września 2026</time>
             <div class="news-content">
               <h2>RDN: miasto zapowiada badania — czekamy na dokładny zakres</h2>
-              <p>Dyrektor ZDiK Grzegorz Wałęga mówi o planowanych badaniach obejmujących obwodnicę na wysokości Osiedla Nauczycielskiego. Wskazuje też, że dobór ewentualnych środków powinien zależeć od wyników. To publiczna deklaracja kierunku działania, a nie obietnica konkretnego zabezpieczenia.</p>
+              <p>Dyrektor ZDiK Grzegorz Wałęga powiedział RDN, że w przygotowywanej mapie hałasu uwzględniona ma być obwodnica na wysokości Osiedla Nauczycielskiego. Wskazał również, że wybór ewentualnych zabezpieczeń ma zależeć od wyników badań.</p>
               <p><a class="news-link" href="https://rdn.pl/468075/mieszkancy-osiedla-nauczycielskiego-maja-dosc-halasu-jakie-rozwiazania-moze-zaproponowac-miasto/" target="_blank" rel="noopener noreferrer">Przeczytaj i posłuchaj w RDN</a></p>
             </div>
           </article>
@@ -60,9 +80,8 @@
           <article class="news-card">
             <time datetime="2026-09-21">21 września 2026</time>
             <div class="news-content">
-              <h2>Listy do przewodniczących klubów i posłanki</h2>
-              <p>Skierowano listy do Zbigniewa Kajpusa z Koalicji Obywatelskiej, Tomasza Żmudy z Naszego Miasta Tarnów, Henryka Łabędzia z Prawa i Sprawiedliwości oraz Krzysztofa Rodaka z koła Tak dla Tarnowa. Pismo skierowano również do posłanki Urszuli Augustyn, zastępczyni przewodniczącego sejmowej Komisji do Spraw Petycji.</p>
-              <p>Celem było przedstawienie sprawy ponad podziałami i uzyskanie konkretnych deklaracji wsparcia dla działań dotyczących mieszkańców Osiedla Nauczycielskiego.</p>
+              <h2>Pisma z prośbą o wsparcie sprawy mieszkańców</h2>
+              <p>Skierowano pisma do przedstawicieli klubów i koła w Radzie Miejskiej oraz do zastępczyni przewodniczącego sejmowej Komisji do Spraw Petycji. Celem było przedstawienie sprawy różnym środowiskom i uzyskanie wsparcia dla wykonania aktualnych pomiarów.</p>
             </div>
           </article>
 
@@ -97,11 +116,27 @@
     </section>
   </main>
 
-  <footer>
-    <div class="wrap footer-row">
-      <span>© 2026 Ciszej na Osiedlu Nauczycielskim</span>
-      <a href="./">Strona główna</a>
+  <footer class="site-footer">
+    <div class="wrap corporate-footer">
+      <div class="footer-identity">
+        <strong>Ciszej na Osiedlu Nauczycielskim</strong>
+        <span>Strona informacyjna mieszkańców Osiedla Nauczycielskiego w Tarnowie</span>
+      </div>
+      <nav class="footer-nav" aria-label="Nawigacja w stopce">
+        <a href="historia-sprawy.html">Historia</a>
+        <a href="dane.html">Dane</a>
+        <a href="inwestycje.html">Otoczenie</a>
+        <a href="aktualnosci.html">Aktualności</a>
+        <a href="media.html">Media</a>
+        <a href="zrodla.html">Dokumenty</a>
+      </nav>
+      <a class="footer-contact" href="mailto:ciszejnaosiedlunauczycielskim@gmail.com">Kontakt</a>
+    </div>
+    <div class="wrap footer-meta">
+      <span>© <span id="year"></span> Ciszej na Osiedlu Nauczycielskim</span>
+      <span>Opis sprawy opieramy na wskazanych dokumentach i źródłach.</span>
     </div>
   </footer>
+  <script src="assets/js/app.js?v=43" defer></script>
 </body>
 </html>

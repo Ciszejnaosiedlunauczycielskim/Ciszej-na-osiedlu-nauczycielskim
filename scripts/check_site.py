@@ -177,6 +177,12 @@ def check_page(page: Path) -> list[str]:
             errors.append(f"{page.name}: brak canonical")
         if 'class="skip"' not in content:
             errors.append(f"{page.name}: brak linku pomijającego nawigację")
+        if 'id="menu"' not in content or 'id="nav"' not in content:
+            errors.append(f"{page.name}: brak spójnej nawigacji mobilnej")
+        if 'assets/css/style.css?v=80' not in content:
+            errors.append(f"{page.name}: nieaktualna wersja arkusza CSS")
+        if 'assets/js/app.js?v=43' not in content:
+            errors.append(f"{page.name}: brak aktualnego skryptu wspólnej nawigacji")
 
     if page.name == "index.html":
         missing_ids = REQUIRED_HOME_IDS - set(parser.ids)
@@ -196,16 +202,30 @@ def check_page(page: Path) -> list[str]:
 
         for required_text in (
             "Chcemy wiedzieć, jaki hałas naprawdę dociera do naszych domów.",
-            "I na tej podstawie zdecydować, jak je chronić.",
+            "Najpierw pomiar. Potem decyzja, co dalej.",
             "Problem jest prosty: brakuje aktualnego pomiaru przy domach.",
             "Nie chcemy zgadywać. Chcemy zmierzyć.",
             "Trzech rzeczy. W tej kolejności.",
-            "159 mieszkańców",
-            "Sprawa ruszyła. Teraz trzeba dopilnować badań.",
-            "Nie trzeba wierzyć opisowi tej strony.",
+            "11 września 159 mieszkańców",
+            "Sprawa ruszyła. Teraz liczy się zakres badań.",
+            "Każdy może sprawdzić dokumenty",
         ):
             if required_text not in content:
                 errors.append(f"{page.name}: brakuje wymaganego tekstu strony głównej: {required_text}")
+
+    if page.name == "media.html":
+        for required_media_text in (
+            "TVP3 Kraków",
+            "RDN Małopolska",
+            "Gazeta Krakowska",
+            "Tarnów Nasze Miasto",
+            "14.09.2026",
+            "25.09.2026",
+        ):
+            if required_media_text not in content:
+                errors.append(f"{page.name}: niepełne archiwum mediów — brak: {required_media_text}")
+        if "press-card" in content or "<style>" in content:
+            errors.append(f"{page.name}: pozostał stary, niespójny layout mediów")
 
     lowered = content.lower()
     for phrase in FORBIDDEN_TEXT:

@@ -7,15 +7,35 @@
   <title>Inwestycje i otoczenie komunikacyjne — Ciszej na Osiedlu Nauczycielskim</title>
   <meta name="description" content="Dokumenty i kontekst dotyczące rozbudowy ul. Lwowskiej, Parku Lwowska i planowanych zmian układu drogowego w rejonie Osiedla Nauczycielskiego.">
   <link rel="canonical" href="https://ciszejnaosiedlunauczycielskim.pl/inwestycje.html">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pl_PL">
+  <meta property="og:site_name" content="Ciszej na Osiedlu Nauczycielskim">
+  <meta property="og:title" content="Otoczenie osiedla — Lwowska, Park Lwowska i układ drogowy">
+  <meta property="og:description" content="Co zmienia się wokół Osiedla Nauczycielskiego i dlaczego aktualny pomiar przy zabudowie jest dziś potrzebny.">
+  <meta property="og:url" content="https://ciszejnaosiedlunauczycielskim.pl/inwestycje.html">
+  <meta property="og:image" content="https://ciszejnaosiedlunauczycielskim.pl/assets/img/WIDOK%20NA%20OSIEDLE%20W%20KLINIE.jpeg">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/style.css?v=79">
+  <link rel="stylesheet" href="assets/css/style.css?v=80">
 </head>
 <body>
   <a class="skip" href="#main">Przejdź do treści</a>
   <header class="site-header">
     <div class="wrap nav">
-      <a class="brand" href="./"><b>Ciszej</b><span>na Osiedlu Nauczycielskim</span></a>
-      <a class="back-link" href="./#inwestycje">← Strona główna</a>
+      <a class="brand" href="./" aria-label="Ciszej na Osiedlu Nauczycielskim — strona główna">
+        <b>Ciszej</b>
+        <span>na Osiedlu Nauczycielskim</span>
+      </a>
+      <button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+      <nav id="nav" aria-label="Główna nawigacja">
+        <a href="./">Start</a>
+        <a href="historia-sprawy.html">Historia</a>
+        <a href="dane.html">Dane</a>
+        <a href="inwestycje.html" aria-current="page">Otoczenie</a>
+        <a href="aktualnosci.html">Aktualności</a>
+        <a href="media.html">Media</a>
+        <a href="zrodla.html">Dokumenty</a>
+      </nav>
     </div>
   </header>
 
@@ -76,11 +96,27 @@
     </section>
   </main>
 
-  <footer>
-    <div class="wrap footer-row">
-      <span>© 2026 Ciszej na Osiedlu Nauczycielskim</span>
-      <a href="zrodla.html">Dokumenty i źródła</a>
+  <footer class="site-footer">
+    <div class="wrap corporate-footer">
+      <div class="footer-identity">
+        <strong>Ciszej na Osiedlu Nauczycielskim</strong>
+        <span>Strona informacyjna mieszkańców Osiedla Nauczycielskiego w Tarnowie</span>
+      </div>
+      <nav class="footer-nav" aria-label="Nawigacja w stopce">
+        <a href="historia-sprawy.html">Historia</a>
+        <a href="dane.html">Dane</a>
+        <a href="inwestycje.html">Otoczenie</a>
+        <a href="aktualnosci.html">Aktualności</a>
+        <a href="media.html">Media</a>
+        <a href="zrodla.html">Dokumenty</a>
+      </nav>
+      <a class="footer-contact" href="mailto:ciszejnaosiedlunauczycielskim@gmail.com">Kontakt</a>
+    </div>
+    <div class="wrap footer-meta">
+      <span>© <span id="year"></span> Ciszej na Osiedlu Nauczycielskim</span>
+      <span>Opis sprawy opieramy na wskazanych dokumentach i źródłach.</span>
     </div>
   </footer>
+  <script src="assets/js/app.js?v=43" defer></script>
 </body>
 </html>

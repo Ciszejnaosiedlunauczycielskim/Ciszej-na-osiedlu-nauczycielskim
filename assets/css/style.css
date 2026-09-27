@@ -1364,3 +1364,188 @@ footer{background:#0b171d;color:#b7c2c7}
   }
   .story-source{display:grid;gap:.45rem}
 }
+
+
+/* Final corporate polish — 2026-09-27 */
+.site-header{
+  position:sticky;
+  top:0;
+  z-index:50;
+  border-bottom:1px solid rgba(207,214,218,.78);
+  background:rgba(255,255,255,.94);
+  backdrop-filter:saturate(150%) blur(14px);
+  -webkit-backdrop-filter:saturate(150%) blur(14px);
+}
+.site-header nav a{
+  position:relative;
+  color:var(--muted);
+  transition:color .16s ease;
+}
+.site-header nav a[aria-current="page"]{color:var(--ink)}
+.site-header nav a[aria-current="page"]::after{
+  content:"";
+  position:absolute;
+  right:.1rem;
+  bottom:-.72rem;
+  left:.1rem;
+  height:2px;
+  border-radius:999px;
+  background:var(--red);
+}
+.site-header nav a:hover{color:var(--red)}
+
+.site-footer{
+  padding:2.7rem 0 1.2rem;
+  border-top:1px solid var(--line);
+  background:#f8f6f4;
+}
+.corporate-footer{
+  display:grid;
+  grid-template-columns:minmax(220px,1.2fr) minmax(420px,1.6fr) auto;
+  gap:2rem;
+  align-items:start;
+}
+.footer-identity{display:grid;gap:.3rem}
+.footer-identity strong{
+  color:var(--ink);
+  font-size:1rem;
+  letter-spacing:-.015em;
+}
+.footer-identity span{
+  max-width:360px;
+  color:var(--muted);
+  font-size:.82rem;
+  line-height:1.45;
+}
+.footer-nav{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.55rem 1.1rem;
+  align-items:center;
+}
+.footer-nav a,
+.footer-contact{
+  color:var(--muted);
+  font-size:.84rem;
+  font-weight:760;
+  text-decoration:none;
+}
+.footer-nav a:hover,
+.footer-contact:hover{color:var(--red)}
+.footer-contact{
+  color:var(--red);
+  white-space:nowrap;
+}
+.footer-meta{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  margin-top:1.6rem;
+  padding-top:1rem;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:.74rem;
+  line-height:1.4;
+}
+
+.home-human .human-facts .human-section-title p:last-child,
+.home-human .human-links .human-section-title p:last-child{
+  max-width:780px;
+}
+.human-fact-list article{
+  transition:background .16s ease,padding .16s ease;
+}
+.human-fact-list article:hover{
+  margin-inline:-.7rem;
+  padding-inline:.7rem;
+  background:rgba(255,255,255,.6);
+}
+.human-ask-list li strong{font-size:1.12rem}
+.human-progress-now{
+  margin-inline:-.7rem;
+  padding-inline:.7rem!important;
+  border-radius:.45rem;
+}
+.human-link-grid a{
+  transition:background .16s ease,color .16s ease;
+}
+
+/* Unified media archive */
+.media-archive{background:#fff}
+.media-archive .subhero{padding-bottom:2.2rem}
+.media-list{
+  max-width:960px;
+  margin:0 auto;
+  border-top:1px solid var(--line);
+}
+.media-entry{
+  display:grid;
+  grid-template-columns:150px minmax(0,1fr);
+  gap:1.6rem;
+  padding:1.7rem 0;
+  border-bottom:1px solid var(--line);
+}
+.media-entry time,
+.media-entry .media-source{
+  color:var(--red);
+  font-size:.8rem;
+  font-weight:900;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.media-entry h2{
+  margin-bottom:.5rem;
+  font-size:clamp(1.35rem,2.4vw,1.85rem);
+  line-height:1.18;
+}
+.media-entry p{
+  max-width:760px;
+  margin-bottom:.55rem;
+  color:var(--muted);
+  line-height:1.58;
+}
+.media-entry .text-cta{font-size:.9rem}
+
+@media(max-width:1100px){
+  .site-header nav{gap:.82rem}
+  .site-header nav a{font-size:.84rem}
+}
+@media(max-width:980px){
+  .site-header nav a[aria-current="page"]::after{display:none}
+  .corporate-footer{
+    grid-template-columns:1fr auto;
+  }
+  .footer-nav{
+    grid-column:1/-1;
+    display:flex!important;
+    order:3;
+  }
+}
+@media(max-width:700px){
+  .site-header{backdrop-filter:none;-webkit-backdrop-filter:none}
+  .human-fact-list article:hover{
+    margin-inline:0;
+    padding-inline:0;
+    background:transparent;
+  }
+  .corporate-footer{
+    grid-template-columns:1fr;
+    gap:1.1rem;
+  }
+  .footer-nav{
+    grid-column:auto;
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:.45rem 1rem;
+  }
+  .footer-contact{justify-self:start}
+  .footer-meta{
+    flex-direction:column;
+    gap:.35rem;
+  }
+  .media-entry{
+    grid-template-columns:1fr;
+    gap:.35rem;
+    padding:1.25rem 0;
+  }
+}

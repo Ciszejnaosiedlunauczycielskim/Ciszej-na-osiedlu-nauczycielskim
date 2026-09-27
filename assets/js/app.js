@@ -39,7 +39,7 @@ const shareStatus = document.querySelector('#share-status');
 if (shareButton) {
   const shareData = {
     title: 'Ciszej na Osiedlu Nauczycielskim',
-    text: 'Sprawdź aktualny stan sprawy hałasu na Osiedlu Nauczycielskim w Tarnowie. Po petycji podpisanej przez 159 mieszkańców ZDiK publicznie zapowiedział badania; nadal czekamy na ich dokładny zakres.',
+    text: '159 mieszkańców Osiedla Nauczycielskiego złożyło petycję o aktualne pomiary hałasu przy zabudowie. Badania zostały zapowiedziane — teraz liczy się ich zakres i to, czy pokażą warunki przy domach.',
     url: 'https://ciszejnaosiedlunauczycielskim.pl/'
   };
 
