@@ -203,15 +203,20 @@ def check_page(page: Path) -> list[str]:
         for required_text in (
             "Chcemy wiedzieć, jaki hałas naprawdę dociera do naszych domów.",
             "Najpierw pomiar. Potem decyzja, co dalej.",
-            "Piętnaście lat dokumentów. Nadal bez odpowiedzi, jaki hałas dociera do naszych domów.",
+            "Problem był badany już w 2011 roku. Co zrobiono przez kolejne 15 lat?",
             "Nie chcemy zgadywać. Chcemy zmierzyć.",
             "Trzech rzeczy. W tej kolejności.",
             "159 mieszkańców",
-            "Po petycji padła zapowiedź. Teraz czekamy na działanie.",
-            "Nie wszystkie posiadane kopie publikujemy",
+            "Petycja przyniosła zapowiedź. Teraz potrzeba konkretnego planu.",
+            "Przy dokumentach dostępnych publicznie podajemy bezpośrednie linki",
         ):
             if required_text not in content:
                 errors.append(f"{page.name}: brakuje wymaganego tekstu strony głównej: {required_text}")
+
+    if page.name == "index.html":
+        for fragment in ('id="share-button"', 'id="share-status"', 'zrodla.html#dokumentacja-2011'):
+            if fragment not in content:
+                errors.append(f"{page.name}: brak kontroli źródeł lub udostępniania: {fragment}")
 
     if page.name == "dane.html":
         for fragment in ("<strong>Gdzie?</strong>", "<strong>Co to znaczy?</strong>", "Pomiar", "Prognoza"):
@@ -230,6 +235,9 @@ def check_page(page: Path) -> list[str]:
 
     if page.name == "zrodla.html" and 'id="miasto-ruch-2016"' not in content:
         errors.append(f"{page.name}: brak oficjalnego źródła danych o ruchu z 2016 r.")
+
+    if page.name == "zrodla.html" and 'id="rdn-zapowiedz-2026"' not in content:
+        errors.append(f"{page.name}: brak weryfikowalnego źródła zapowiedzi ZDiK")
 
     if page.name == "index.html" and content.count('class="fact-source"') < 3:
         errors.append(f"{page.name}: brakuje odnośników do źródeł przy liczbach")
