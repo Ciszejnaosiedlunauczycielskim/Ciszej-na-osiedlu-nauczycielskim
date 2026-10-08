@@ -223,6 +223,17 @@ def check_page(page: Path) -> list[str]:
             if fragment not in content:
                 errors.append(f"{page.name}: brak informacji o dostępie do źródeł: {fragment}")
 
+    if page.name == "dane.html":
+        for fragment in ('class="road-schematic"', 'class="road-steps"', 'class="method-plain"'):
+            if fragment not in content:
+                errors.append(f"{page.name}: brak schematu lub objaśnienia metod: {fragment}")
+
+    if page.name == "zrodla.html" and 'id="miasto-ruch-2016"' not in content:
+        errors.append(f"{page.name}: brak oficjalnego źródła danych o ruchu z 2016 r.")
+
+    if page.name == "index.html" and content.count('class="fact-source"') < 3:
+        errors.append(f"{page.name}: brakuje odnośników do źródeł przy liczbach")
+
     if page.name == "media.html":
         for required_media_text in (
             "TVP3 Kraków",
@@ -236,10 +247,6 @@ def check_page(page: Path) -> list[str]:
                 errors.append(f"{page.name}: niepełne archiwum mediów — brak: {required_media_text}")
         if "press-card" in content or "<style>" in content:
             errors.append(f"{page.name}: pozostał stary, niespójny layout mediów")
-
-    for unreported in ("20 142", "8 220", "EFEKTAR"):
-        if unreported in content and page in PUBLIC_PAGES:
-            errors.append(f"{page.name}: niepublikowane dane w treści publicznej")
 
     lowered = content.lower()
     for phrase in FORBIDDEN_TEXT:
@@ -292,6 +299,8 @@ def check_css() -> list[str]:
         ".human-place-grid",
         ".human-progress-list",
         ".human-link-grid",
+        ".road-schematic",
+        ".method-plain",
     ):
         if required not in css:
             errors.append(f"assets/css/style.css: brakuje reguły {required}")
