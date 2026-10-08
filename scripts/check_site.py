@@ -203,11 +203,11 @@ def check_page(page: Path) -> list[str]:
         for required_text in (
             "Chcemy wiedzieć, jaki hałas naprawdę dociera do naszych domów.",
             "Najpierw pomiar. Potem decyzja, co dalej.",
-            "Od lat brakuje odpowiedzi na jedno pytanie: jak głośno jest przy naszych domach?",
+            "Piętnaście lat dokumentów. Nadal bez odpowiedzi, jaki hałas dociera do naszych domów.",
             "Nie chcemy zgadywać. Chcemy zmierzyć.",
             "Trzech rzeczy. W tej kolejności.",
             "159 mieszkańców",
-            "Sprawa ruszyła. Teraz liczy się zakres badań.",
+            "Po petycji padła zapowiedź. Teraz czekamy na działanie.",
             "Nie wszystkie posiadane kopie publikujemy",
         ):
             if required_text not in content:
