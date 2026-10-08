@@ -203,15 +203,25 @@ def check_page(page: Path) -> list[str]:
         for required_text in (
             "Chcemy wiedzieć, jaki hałas naprawdę dociera do naszych domów.",
             "Najpierw pomiar. Potem decyzja, co dalej.",
-            "Problem jest prosty: brakuje aktualnego pomiaru przy domach.",
+            "Od lat brakuje odpowiedzi na jedno pytanie: jak głośno jest przy naszych domach?",
             "Nie chcemy zgadywać. Chcemy zmierzyć.",
             "Trzech rzeczy. W tej kolejności.",
-            "11 września 159 mieszkańców",
+            "159 mieszkańców",
             "Sprawa ruszyła. Teraz liczy się zakres badań.",
-            "Każdy może sprawdzić dokumenty",
+            "Nie wszystkie posiadane kopie publikujemy",
         ):
             if required_text not in content:
                 errors.append(f"{page.name}: brakuje wymaganego tekstu strony głównej: {required_text}")
+
+    if page.name == "dane.html":
+        for fragment in ("<strong>Gdzie?</strong>", "<strong>Co to znaczy?</strong>", "Pomiar", "Prognoza"):
+            if fragment not in content:
+                errors.append(f"{page.name}: brak objaśnienia danych: {fragment}")
+
+    if page.name == "zrodla.html":
+        for fragment in ("Kopia nieopublikowana", "Dokument dostępny z linku", "Pełna kopia poszukiwana"):
+            if fragment not in content:
+                errors.append(f"{page.name}: brak informacji o dostępie do źródeł: {fragment}")
 
     if page.name == "media.html":
         for required_media_text in (
@@ -226,6 +236,10 @@ def check_page(page: Path) -> list[str]:
                 errors.append(f"{page.name}: niepełne archiwum mediów — brak: {required_media_text}")
         if "press-card" in content or "<style>" in content:
             errors.append(f"{page.name}: pozostał stary, niespójny layout mediów")
+
+    for unreported in ("20 142", "8 220", "EFEKTAR"):
+        if unreported in content and page in PUBLIC_PAGES:
+            errors.append(f"{page.name}: niepublikowane dane w treści publicznej")
 
     lowered = content.lower()
     for phrase in FORBIDDEN_TEXT:
