@@ -1549,3 +1549,26 @@ footer{background:#0b171d;color:#b7c2c7}
     padding:1.25rem 0;
   }
 }
+
+
+/* Zrozumiały schemat odcinków i odnośniki do źródeł — październik 2026 */
+.human-fact-list p.fact-source{margin-top:.65rem;font-size:.87rem}
+.human-fact-list .fact-source a{color:var(--red);font-weight:750;text-underline-offset:.22em}
+.road-schematic{margin:0 0 1.6rem;padding:1.25rem 1.4rem;border:1px solid var(--line);border-radius:.9rem;background:#fff}
+.road-schematic h2{margin:0 0 .45rem;font-size:1.32rem}
+.road-schematic p{margin:.35rem 0 1rem;color:var(--muted)}
+.road-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.6rem;list-style:none;margin:1rem 0;padding:0}
+.road-steps li{position:relative;min-width:0;display:flex;align-items:center;justify-content:center;min-height:4.15rem;padding:.7rem .45rem;border:1px solid var(--line);border-radius:.55rem;background:var(--soft);color:var(--ink);font-size:.87rem;font-weight:750;text-align:center}
+.road-steps li:not(:last-child)::after{content:"›";position:absolute;right:-.49rem;top:50%;transform:translateY(-50%);color:var(--red);font-size:1.4rem;font-weight:900;z-index:1}
+.road-schematic figcaption{max-width:66rem;color:var(--muted);font-size:.85rem;line-height:1.55}
+.method-plain{max-width:980px;margin:1.6rem 0 1rem;padding:1.35rem 1.5rem;border:1px solid var(--line);border-radius:.75rem;background:#fff}
+.method-plain h2{margin:0 0 .6rem;font-size:1.42rem}
+.method-plain p{margin:.55rem 0;color:var(--muted)}
+.method-plain strong{color:var(--ink)}
+@media(max-width:700px){
+ .road-schematic{padding:1rem}
+ .road-steps{grid-template-columns:1fr;gap:.55rem;margin:.9rem 0}
+ .road-steps li{min-height:2.5rem;padding:.55rem .7rem}
+ .road-steps li:not(:last-child)::after{content:"⌄";top:auto;bottom:-.72rem;right:50%;transform:translateX(50%);font-size:1.18rem}
+ .method-plain{padding:1rem}
+}
