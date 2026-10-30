@@ -344,6 +344,31 @@ def check_fact_consistency() -> list[str]:
     if "Dane o ruchu z 2016 r. opisują dwa pierwsze odcinki" in data:
         errors.append("dane.html: powrócił stary, błędny opis przekrojów EFEKTAR")
 
+    # Krytyczna korekta mieszkańców: EFEKTAR przekrój III i SWECO
+    # odcinek D opisują TEN SAM odcinek Szpital–Karpacka.
+    # Test wyłapuje powrót wcześniej wielokrotnie prostowanego błędu.
+    forbidden_geography = (
+        "na pobliskim odcinku",
+        "nie są dwa pomiary w tym samym miejscu i czasie",
+        "niejednoznacznie identycznych przekrojów",
+        "to podobnie opisany rejon",
+        "To powiązany rejon",
+        "nieco inaczej opisane odcinki",
+        "granice porównywanych odcinków nie zostały",
+        "należy sprawdzić granice odcinków",
+    )
+    for page_name in ("index.html", "dane.html", "aktualnosci.html",
+                      "zrodla.html", "historia-sprawy.html"):
+        page_content = (ROOT / page_name).read_text(encoding="utf-8")
+        for error_phrase in forbidden_geography:
+            if error_phrase.lower() in page_content.lower():
+                errors.append(f"{page_name}: wrócił błędny opis lokalizacji EFEKTAR/SWECO: {error_phrase}")
+    for page_name in ("index.html", "dane.html", "aktualnosci.html",
+                      "zrodla.html", "historia-sprawy.html"):
+        page_content = (ROOT / page_name).read_text(encoding="utf-8")
+        if not any(term in page_content.lower() for term in ("tego samego odcinka", "ten sam odcinek")):
+            errors.append(f"{page_name}: brak jasnego stwierdzenia, że EFEKTAR i SWECO dotyczą tego samego odcinka")
+
     news = (ROOT / "aktualnosci.html").read_text(encoding="utf-8")
     if "2027" in news and "projekcie budżetu" not in news:
         errors.append("aktualnosci.html: zapowiedź 2027 bez rozróżnienia projektu budżetu")
