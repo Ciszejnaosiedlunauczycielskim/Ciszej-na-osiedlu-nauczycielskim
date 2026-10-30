@@ -370,6 +370,23 @@ def check_fact_consistency() -> list[str]:
             if value not in content:
                 errors.append(f"{relative_path}: brakuje kluczowego faktu lub oznaczenia źródła: {value}")
 
+    # Czytelnik bez znajomości akt powinien mieć krótkie objaśnienia i skróty nawigacyjne.
+    reader_structures = {
+        "index.html": ('class="reader-compare"', 'reader-compare-number'),
+        "dane.html": ('class="reader-glossary"', 'href="#porownanie-efektar-sweco"',
+                      'id="inne-dane"', 'id="jak-czytac-mape"'),
+        "aktualnosci.html": ('class="reader-toc"', 'id="pytanie-ruch"',
+                             'id="pytanie-nawierzchnia"', 'id="pytanie-ekran"',
+                             'id="pytanie-park"', 'id="pytanie-obwodnica"'),
+        "zrodla.html": ('class="reader-toc"', 'href="#efektar-2016"', 'href="#kip-sweco"'),
+        "inwestycje.html": ('class="reader-toc"', 'id="lwowska"', 'id="przyszle-drogi"'),
+    }
+    for page_name, required in reader_structures.items():
+        page_content = (ROOT / page_name).read_text(encoding="utf-8")
+        for item in required:
+            if item not in page_content:
+                errors.append(f"{page_name}: brak objaśnienia lub skrótu nawigacyjnego: {item}")
+
     data = (ROOT / "dane.html").read_text(encoding="utf-8")
     if "Dane o ruchu z 2016 r. opisują dwa pierwsze odcinki" in data:
         errors.append("dane.html: powrócił stary, błędny opis przekrojów EFEKTAR")
