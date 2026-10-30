@@ -182,7 +182,7 @@ def check_page(page: Path) -> list[str]:
             errors.append(f"{page.name}: brak linku pomijającego nawigację")
         if 'id="menu"' not in content or 'id="nav"' not in content:
             errors.append(f"{page.name}: brak spójnej nawigacji mobilnej")
-        if 'assets/css/style.css?v=82' not in content:
+        if 'assets/css/style.css?v=83' not in content:
             errors.append(f"{page.name}: nieaktualna wersja arkusza CSS")
         if 'assets/js/app.js?v=43' not in content:
             errors.append(f"{page.name}: brak aktualnego skryptu wspólnej nawigacji")
@@ -386,6 +386,23 @@ def check_fact_consistency() -> list[str]:
         for item in required:
             if item not in page_content:
                 errors.append(f"{page_name}: brak objaśnienia lub skrótu nawigacyjnego: {item}")
+
+    # Obowiązkowa kontrola: problem wykracza poza pojedynczy pomiar hałasu.
+    systemic_checks = {
+        "index.html": ('id="luki-w-ocenie"', 'class="system-gap-grid"',
+                       'wcześniejszymi zaleceniami', 'tego samego odcinka'),
+        "aktualnosci.html": ('id="pytanie-zalecenia"', 'id="pytanie-spojnosc"',
+                             'wcześniejsze sygnały', 'pełną oceną oddziaływania'),
+        "dane.html": ('id="spojnosc-danych"', 'dane, na których oparto decyzje', 'Parkiem Lwowska'),
+        "inwestycje.html": ('id="kontrola-laczna"', 'całej okolicy',
+                            'Wschodniej Obwodnicy'),
+        "historia-sprawy.html": ('w 2011 r.', 'jednej aktualnej oceny'),
+    }
+    for page_name, fragments in systemic_checks.items():
+        article = (ROOT / page_name).read_text(encoding="utf-8").lower()
+        for fragment in fragments:
+            if fragment.lower() not in article:
+                errors.append(f"{page_name}: brak kluczowego argumentu dotyczącego łącznej kontroli: {fragment}")
 
     data = (ROOT / "dane.html").read_text(encoding="utf-8")
     if "Dane o ruchu z 2016 r. opisują dwa pierwsze odcinki" in data:
