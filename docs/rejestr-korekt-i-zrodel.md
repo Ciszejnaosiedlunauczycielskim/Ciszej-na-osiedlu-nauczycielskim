@@ -10,7 +10,7 @@ Dokument redakcyjny dla kolejnych aktualizacji witryny. Zasada: najpierw sprawd�
 | EFEKTAR | Przekrój III, Szpital św. Łukasza – ul. Karpacka; 6–7.04.2016; odpowiednio 14 447 i 14 840 pojazdów w godzinach 6–22; wynik szacunkowy SDR 20 142/dobę | D07, akta s. 20–28 | Że 20 142 to bezpośredni pomiar 24-godzinny |
 | EFEKTAR, ciężarówki | Średnio 2274,5 pojazdu kategorii e+f w dwóch pomiarach 16 h | D07, akta s. 20–28 | Że jest to wynik dobowy |
 | SWECO | KIP z lipca 2017, prognoza na 2019: odcinek Szpital–Osiedle Nauczycielskie (do ul. Karpackiej) 11 530 pojazdów/dobę, w tym ciężarowe bez/z przyczepą 243+1096=1339/dobę | D09, akta s. 95, oryg. s. 57 | Że prognoza jest pomiarem albo udowodniono jej celowe zaniżenie |
-| Różnica | 20 142 minus 11 530 = 8612; różne lata, metodologia i konieczne potwierdzenie przekrojów | D07 i D09 | Że 8612 pojazdów na pewno pominięto w projekcie |
+| Różnica | 20 142 minus 11 530 = 8612 **na tym samym odcinku Szpital św. Łukasza–Karpacka (wjazd do osiedla)**; EFEKTAR 2016 pomiar przeliczony na dobę, SWECO 2017 prognoza na 2019; różne lata i metody, **nie lokalizacja** | D07 przekrój III i D09 odcinek D | Że są to dwa różne odcinki albo że 8612 pojazdów na pewno celowo pominięto w projekcie |
 | Karpacka 4, 2019 | Bez ochrony 62,8/55,9 dB, po modelowanej ochronie 57,8/50,9 dB, dzień/noc | D09, akta s. 80, oryg. s. 42 | Że są to wykonane w 2019 r. pomiary |
 | Karpacka 4, 2039 | Bez ochrony 63,5/56,8 dB, po modelowanej ochronie 58,5/51,8 dB, dzień/noc; wartości odniesienia w tabeli 61/56 | D09, akta s. 81, oryg. s. 43 | Że są to pomiary lub gwarancja skuteczności w 2039 |
 | Cichsza nawierzchnia | KIP przyjmuje już do 5 dB redukcji w modelu; efekt w receptorach po ochronie dotyczy założeń projektu | D09, akta s. 80–81, 95–96 | Że obecnie zapowiadane „do 5 dB” można automatycznie doliczyć drugi raz albo że podwójne liczenie jest udowodnione |
@@ -26,7 +26,7 @@ Dokument redakcyjny dla kolejnych aktualizacji witryny. Zasada: najpierw sprawd�
 ## Zasady kolejnych korekt
 
 1. Przed zmianą danych ruchowych sprawdź cały blok `dane.html#porownanie-efektar-sweco` i odpowiadający fragment `aktualnosci.html`, `zrodla.html` oraz `historia-sprawy.html`.
-2. Nie myl okolicy Szpitala św. Łukasza z samym wjazdem przy Karpackiej; nie pisz, że przekroje są całkiem niepowiązane.
+2. **Korekta użytkownika, obowiązująca bez wyjątków: EFEKTAR i SWECO dotyczą tego samego odcinka Szpital św. Łukasza–Karpacka.** Nie pisz, że są to różne miejsca, „pobliskie odcinki”, „tylko powiązany rejon” ani „nieidentyczne przekroje”. EFEKTAR przekrój III i SWECO odcinek D mają w tych dokumentach te same punkty graniczne — szpital i wjazd na osiedle przy Karpackiej. Różnica dotyczy roku, metody i źródła danych; nie lokalizacji. Ta korekta była wcześniej wielokrotnie przekazywana i została błędnie przywrócona, dlatego musi być kontrolowana w całej witrynie.
 3. Nie usuwaj liczb potwierdzonych oryginałem. Jeśli nie można znaleźć źródła, zaznacz granicę wiedzy, nie zgaduj.
 4. Porównanie 2016–2019 nie stanowi dowodu fałszerstwa. Mocną krytykę buduj na pytaniu, czy wcześniej dostępne pomiary uwzględniono w KIP i późniejszym projekcie.
 5. Zachowaj rozdział odpowiedzi miasta, głosu mieszkańców i ustaleń kontrolnych.
