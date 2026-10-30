@@ -182,7 +182,7 @@ def check_page(page: Path) -> list[str]:
             errors.append(f"{page.name}: brak linku pomijającego nawigację")
         if 'id="menu"' not in content or 'id="nav"' not in content:
             errors.append(f"{page.name}: brak spójnej nawigacji mobilnej")
-        if 'assets/css/style.css?v=81' not in content:
+        if 'assets/css/style.css?v=82' not in content:
             errors.append(f"{page.name}: nieaktualna wersja arkusza CSS")
         if 'assets/js/app.js?v=43' not in content:
             errors.append(f"{page.name}: brak aktualnego skryptu wspólnej nawigacji")
@@ -369,6 +369,23 @@ def check_fact_consistency() -> list[str]:
         for value in values:
             if value not in content:
                 errors.append(f"{relative_path}: brakuje kluczowego faktu lub oznaczenia źródła: {value}")
+
+    # Czytelnik bez znajomości akt powinien mieć krótkie objaśnienia i skróty nawigacyjne.
+    reader_structures = {
+        "index.html": ('class="reader-compare"', 'reader-compare-number'),
+        "dane.html": ('class="reader-glossary"', 'href="#porownanie-efektar-sweco"',
+                      'id="inne-dane"', 'id="jak-czytac-mape"'),
+        "aktualnosci.html": ('class="reader-toc"', 'id="pytanie-ruch"',
+                             'id="pytanie-nawierzchnia"', 'id="pytanie-ekran"',
+                             'id="pytanie-park"', 'id="pytanie-obwodnica"'),
+        "zrodla.html": ('class="reader-toc"', 'href="#efektar-2016"', 'href="#kip-sweco"'),
+        "inwestycje.html": ('class="reader-toc"', 'id="lwowska"', 'id="przyszle-drogi"'),
+    }
+    for page_name, required in reader_structures.items():
+        page_content = (ROOT / page_name).read_text(encoding="utf-8")
+        for item in required:
+            if item not in page_content:
+                errors.append(f"{page_name}: brak objaśnienia lub skrótu nawigacyjnego: {item}")
 
     data = (ROOT / "dane.html").read_text(encoding="utf-8")
     if "Dane o ruchu z 2016 r. opisują dwa pierwsze odcinki" in data:
