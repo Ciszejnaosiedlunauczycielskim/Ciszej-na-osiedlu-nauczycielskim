@@ -1572,3 +1572,14 @@ footer{background:#0b171d;color:#b7c2c7}
  .road-steps li:not(:last-child)::after{content:"⌄";top:auto;bottom:-.72rem;right:50%;transform:translateX(50%);font-size:1.18rem}
  .method-plain{padding:1rem}
 }
+
+/* Październik 2026: mobilne tabele dowodowe z opisem źródeł */
+.evidence-table-wrap{max-width:100%;overflow-x:auto;margin:1.15rem 0 1.4rem;scrollbar-width:thin;border:1px solid var(--line);border-radius:.7rem;background:#fff}
+.evidence-table{width:100%;min-width:590px;border-collapse:collapse;font-size:.92rem;line-height:1.5}
+.evidence-table caption{padding:.75rem 1rem;text-align:left;font-size:.83rem;color:var(--muted);font-weight:650}
+.evidence-table th,.evidence-table td{padding:.85rem .95rem;vertical-align:top;text-align:left;border-top:1px solid var(--line)}
+.evidence-table thead th{background:var(--soft);color:var(--ink);font-weight:800}
+.evidence-table tbody th{width:27%;font-weight:800}
+.news-content h3{margin-top:1.65rem;margin-bottom:.45rem;font-size:clamp(1.14rem,2.1vw,1.36rem);line-height:1.35}
+.news-content a:not(.news-link){text-decoration:underline;text-underline-offset:.16em}
+@media(max-width:700px){.evidence-table{font-size:.86rem}.evidence-table th,.evidence-table td{padding:.65rem .75rem}.news-content h3{margin-top:1.35rem}}
