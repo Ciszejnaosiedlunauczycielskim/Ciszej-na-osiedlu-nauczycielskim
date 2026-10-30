@@ -366,7 +366,7 @@ def check_fact_consistency() -> list[str]:
     for page_name in ("index.html", "dane.html", "aktualnosci.html",
                       "zrodla.html", "historia-sprawy.html"):
         page_content = (ROOT / page_name).read_text(encoding="utf-8")
-        if "tego samego odcinka" not in page_content.lower():
+        if not any(term in page_content.lower() for term in ("tego samego odcinka", "ten sam odcinek")):
             errors.append(f"{page_name}: brak jasnego stwierdzenia, że EFEKTAR i SWECO dotyczą tego samego odcinka")
 
     news = (ROOT / "aktualnosci.html").read_text(encoding="utf-8")
