@@ -405,12 +405,18 @@ def check_fact_consistency() -> list[str]:
     if "Rozpoczęła się kontrola NIK" in news:
         errors.append("aktualnosci.html: niepotwierdzone rozpoczęcie kontroli")
 
-    # Odrębne instytucje wymagają własnych wpisów w rejestrze.
-    for name in ("Najwyższa Izba Kontroli", "Rzecznik Praw Obywatelskich",
-                 "GDDKiA, Oddział Kraków", "Marszałek Województwa Małopolskiego",
-                 "Główny Inspektor Ochrony Środowiska"):
-        if name not in news:
-            errors.append(f"aktualnosci.html: brak indywidualnego wpisu — {name}")
+    # Witryna podaje fakty sprawy, nie wewnętrzne szczegóły obsługi korespondencji.
+    for topic in ("Ruch na Lwowskiej", "Hałas przy domach", "Nawierzchnia i ekrany",
+                  "Park Lwowska", "Dalsze badania"):
+        if topic not in news:
+            errors.append(f"aktualnosci.html: brak kwestii wymagającej wyjaśnienia — {topic}")
+    for page in PUBLIC_PAGES:
+        content = page.read_text(encoding="utf-8").lower()
+        for forbidden in ("e-doręcze", "e-dorecze", "potwierdzenia nadania",
+                          "status doręcze", "status przesyłek", "stan potwierdzeń",
+                          "przesyłek do nik", "do potwierdzenia"):
+            if forbidden in content:
+                errors.append(f"{page.name}: publiczna strona zawiera roboczą informację o korespondencji: {forbidden}")
     return errors
 
 
