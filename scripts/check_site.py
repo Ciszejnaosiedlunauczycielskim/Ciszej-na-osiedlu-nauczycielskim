@@ -393,7 +393,7 @@ def check_fact_consistency() -> list[str]:
                        'wcześniejszymi zaleceniami', 'tego samego odcinka'),
         "aktualnosci.html": ('id="pytanie-zalecenia"', 'id="pytanie-spojnosc"',
                              'wcześniejsze sygnały', 'pełną oceną oddziaływania'),
-        "dane.html": ('id="spojnosc-danych"', 'kluczowe dane', 'Parkiem Lwowska'),
+        "dane.html": ('id="spojnosc-danych"', 'dane, na których oparto decyzje', 'Parkiem Lwowska'),
         "inwestycje.html": ('id="kontrola-laczna"', 'całej okolicy',
                             'Wschodniej Obwodnicy'),
         "historia-sprawy.html": ('w 2011 r.', 'jednej aktualnej oceny'),
