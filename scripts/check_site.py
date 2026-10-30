@@ -182,7 +182,7 @@ def check_page(page: Path) -> list[str]:
             errors.append(f"{page.name}: brak linku pomijającego nawigację")
         if 'id="menu"' not in content or 'id="nav"' not in content:
             errors.append(f"{page.name}: brak spójnej nawigacji mobilnej")
-        if 'assets/css/style.css?v=81' not in content:
+        if 'assets/css/style.css?v=82' not in content:
             errors.append(f"{page.name}: nieaktualna wersja arkusza CSS")
         if 'assets/js/app.js?v=43' not in content:
             errors.append(f"{page.name}: brak aktualnego skryptu wspólnej nawigacji")
