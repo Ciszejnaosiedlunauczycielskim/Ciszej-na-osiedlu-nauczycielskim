@@ -1,0 +1,42 @@
+name: Testy strony w przeglądarce
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 15
+    steps:
+      - name: Pobierz repozytorium
+        uses: actions/checkout@v4
+      - name: Przygotuj Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Przygotuj Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Zainstaluj pakiet Playwright (Chromium jest w obrazie)
+        run: npm install --no-save playwright@1.56.1
+      - name: Uruchom lokalną stronę
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/site-server.log 2>&1 &
+          for n in $(seq 1 15); do curl -fsS http://127.0.0.1:8765/ >/dev/null && break || sleep 1; done
+      - name: Przetestuj strony na telefonie, tablecie i komputerze
+        run: node scripts/browser_smoke.mjs
+      - name: Udostępnij zrzuty ekranu
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrzuty-audytu-strony
+          path: browser-audit-screenshots/
+          if-no-files-found: ignore

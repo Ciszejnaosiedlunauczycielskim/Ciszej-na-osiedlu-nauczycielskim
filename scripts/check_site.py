@@ -3,6 +3,8 @@ from __future__ import annotations
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlparse
+from datetime import date
+import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_PAGES = [
@@ -180,7 +182,7 @@ def check_page(page: Path) -> list[str]:
             errors.append(f"{page.name}: brak linku pomijającego nawigację")
         if 'id="menu"' not in content or 'id="nav"' not in content:
             errors.append(f"{page.name}: brak spójnej nawigacji mobilnej")
-        if 'assets/css/style.css?v=80' not in content:
+        if 'assets/css/style.css?v=81' not in content:
             errors.append(f"{page.name}: nieaktualna wersja arkusza CSS")
         if 'assets/js/app.js?v=43' not in content:
             errors.append(f"{page.name}: brak aktualnego skryptu wspólnej nawigacji")
@@ -309,11 +311,39 @@ def check_css() -> list[str]:
 
 def check_sitemap() -> list[str]:
     errors: list[str] = []
-    content = (ROOT / "sitemap.xml").read_text(encoding="utf-8")
-    for page in PUBLIC_PAGES:
-        url = "https://ciszejnaosiedlunauczycielskim.pl/" if page.name == "index.html" else f"https://ciszejnaosiedlunauczycielskim.pl/{page.name}"
-        if url not in content:
-            errors.append(f"sitemap.xml: brakuje {url}")
+    path = ROOT / "sitemap.xml"
+    try:
+        root = ET.parse(path).getroot()
+    except ET.ParseError as exc:
+        return [f"sitemap.xml: błędny XML: {exc}"]
+
+    ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+    items = {}
+    for entry in root.findall("sm:url", ns):
+        loc = entry.findtext("sm:loc", namespaces=ns)
+        modified = entry.findtext("sm:lastmod", namespaces=ns)
+        if not loc or loc in items:
+            errors.append(f"sitemap.xml: pusty lub powtórzony adres URL: {loc}")
+            continue
+        if not modified:
+            errors.append(f"sitemap.xml: brak daty lastmod dla {loc}")
+        else:
+            try:
+                if date.fromisoformat(modified) > date.today():
+                    errors.append(f"sitemap.xml: data lastmod z przyszłości dla {loc}")
+            except ValueError:
+                errors.append(f"sitemap.xml: nieprawidłowy format lastmod dla {loc}: {modified}")
+        items[loc] = modified
+
+    expected = {
+        "https://ciszejnaosiedlunauczycielskim.pl/" if page.name == "index.html"
+        else f"https://ciszejnaosiedlunauczycielskim.pl/{page.name}"
+        for page in PUBLIC_PAGES
+    }
+    for url in sorted(expected - set(items)):
+        errors.append(f"sitemap.xml: brakuje {url}")
+    for url in sorted(set(items) - expected):
+        errors.append(f"sitemap.xml: nieznany adres {url}")
     return errors
 
 
