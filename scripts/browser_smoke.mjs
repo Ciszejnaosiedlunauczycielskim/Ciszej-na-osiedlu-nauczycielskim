@@ -46,7 +46,17 @@ for (const viewport of viewports) {
       errors.push(file + ' ' + viewport.label + ': błędna struktura ' + JSON.stringify(info));
     }
     if (info.width > info.viewportWidth + 3) {
-      errors.push(file + ' ' + viewport.label + ': przewijanie poziome całej strony ' + info.width + '>' + info.viewportWidth);
+      const overflowing = await page.evaluate(() =>
+        [...document.querySelectorAll('body *')].filter(el => {
+          const r = el.getBoundingClientRect();
+          return r.width > window.innerWidth + 3 || r.right > window.innerWidth + 4;
+        }).slice(0, 12).map(el => {
+          const r = el.getBoundingClientRect();
+          return { tag: el.tagName.toLowerCase(), cls: String(el.className).slice(0, 90),
+                   width: Math.round(r.width), right: Math.round(r.right) };
+        })
+      );
+      errors.push(file + ' ' + viewport.label + ': przewijanie poziome całej strony ' + info.width + '>' + info.viewportWidth + ', elementy: ' + JSON.stringify(overflowing));
     }
     if (info.badImages.length) errors.push(file + ' ' + viewport.label + ': niezaładowane obrazy ' + info.badImages.join(', '));
 
