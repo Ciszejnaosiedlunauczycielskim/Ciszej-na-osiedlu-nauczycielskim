@@ -39,7 +39,7 @@ const shareStatus = document.querySelector('#share-status');
 if (shareButton) {
   const shareData = {
     title: 'Ciszej na Osiedlu Nauczycielskim',
-    text: '159 mieszkańców Osiedla Nauczycielskiego złożyło petycję o aktualne pomiary hałasu przy zabudowie. Badania zostały zapowiedziane — teraz liczy się ich zakres i to, czy pokażą warunki przy domach.',
+    text: 'Miasto odpowiedziało na petycję 159 mieszkańców. Wyjaśniamy rozbieżności w danych o ruchu, zapowiedź badań na 2027 r. i kolejne działania w sprawie hałasu przy domach.',
     url: 'https://ciszejnaosiedlunauczycielskim.pl/'
   };
 
