@@ -1583,3 +1583,13 @@ footer{background:#0b171d;color:#b7c2c7}
 .news-content h3{margin-top:1.65rem;margin-bottom:.45rem;font-size:clamp(1.14rem,2.1vw,1.36rem);line-height:1.35}
 .news-content a:not(.news-link){text-decoration:underline;text-underline-offset:.16em}
 @media(max-width:700px){.evidence-table{font-size:.86rem}.evidence-table th,.evidence-table td{padding:.65rem .75rem}.news-content h3{margin-top:1.35rem}}
+
+
+/* Audyt Playwright 2026-10-30: tabela statusów przewija się we własnym kontenerze,
+   zamiast poszerzać całą stronę Aktualności na telefonie. */
+.news-card,
+.news-content{min-width:0}
+.news-card .evidence-table-wrap{display:block;width:100%;max-width:100%;overflow-x:auto}
+@media(max-width:980px){
+  .news-card{grid-template-columns:minmax(0,1fr)}
+}
