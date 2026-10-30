@@ -201,17 +201,9 @@ def check_page(page: Path) -> list[str]:
         if content.count("<h1") != 1:
             errors.append(f"{page.name}: strona główna powinna mieć jeden H1")
 
-        for required_text in (
-            "Chcemy wiedzieć, jaki hałas naprawdę dociera do naszych domów.",
-            "Najpierw pomiar. Potem decyzja, co dalej.",
-            "Problem był badany już w 2011 roku. Co zrobiono przez kolejne 15 lat?",
-            "Nie chcemy zgadywać. Chcemy zmierzyć.",
-            "Trzech rzeczy. W tej kolejności.",
-            "159 mieszkańców",
-            "Przy dokumentach dostępnych publicznie podajemy bezpośrednie linki",
-        ):
-            if required_text not in content:
-                errors.append(f"{page.name}: brakuje wymaganego tekstu strony głównej: {required_text}")
+        # Testujemy istnienie istotnego faktu, nie brzmienie redakcyjnego nagłówka.
+        if "159" not in content or "petycj" not in content.lower():
+            errors.append(f"{page.name}: brak podstawowej informacji o petycji 159 mieszkańców")
 
     if page.name == "index.html":
         for fragment in ('id="share-button"', 'id="share-status"', 'zrodla.html#dokumentacja-2011'):
@@ -325,6 +317,48 @@ def check_sitemap() -> list[str]:
     return errors
 
 
+
+def check_fact_consistency() -> list[str]:
+    """Stałe fakty ze źródeł, a nie sztywne brzmienie artykułów."""
+    errors: list[str] = []
+    required_values = {
+        "dane.html": ("20 142", "11 530", "2274,5", "1339",
+                      "62,8", "55,9", "57,8", "50,9",
+                      "63,5", "56,8", "58,5", "51,8",
+                      "Szpital", "Karpacka", "D07", "D09"),
+        "aktualnosci.html": ("20 142", "11 530", "2274,5", "1339",
+                             "63,5", "58,5", "2027", "D20",
+                             "status-wystapien"),
+        "zrodla.html": ("D07", "D09", "D13", "D14", "D20",
+                        "efektar-2016", "rdos-2025"),
+        "inwestycje.html": ("DK73", "DK94", "RDOŚ", "PPIS",
+                             "24-metrowy"),
+    }
+    for relative_path, values in required_values.items():
+        content = (ROOT / relative_path).read_text(encoding="utf-8")
+        for value in values:
+            if value not in content:
+                errors.append(f"{relative_path}: brakuje kluczowego faktu lub oznaczenia źródła: {value}")
+
+    data = (ROOT / "dane.html").read_text(encoding="utf-8")
+    if "Dane o ruchu z 2016 r. opisują dwa pierwsze odcinki" in data:
+        errors.append("dane.html: powrócił stary, błędny opis przekrojów EFEKTAR")
+
+    news = (ROOT / "aktualnosci.html").read_text(encoding="utf-8")
+    if "2027" in news and "projekcie budżetu" not in news:
+        errors.append("aktualnosci.html: zapowiedź 2027 bez rozróżnienia projektu budżetu")
+    if "Rozpoczęła się kontrola NIK" in news:
+        errors.append("aktualnosci.html: niepotwierdzone rozpoczęcie kontroli")
+
+    # Odrębne instytucje wymagają własnych wpisów w rejestrze.
+    for name in ("Najwyższa Izba Kontroli", "Rzecznik Praw Obywatelskich",
+                 "GDDKiA, Oddział Kraków", "Marszałek Województwa Małopolskiego",
+                 "Główny Inspektor Ochrony Środowiska"):
+        if name not in news:
+            errors.append(f"aktualnosci.html: brak indywidualnego wpisu — {name}")
+    return errors
+
+
 def main() -> None:
     errors: list[str] = []
 
@@ -340,6 +374,7 @@ def main() -> None:
 
     errors.extend(check_css())
     errors.extend(check_sitemap())
+    errors.extend(check_fact_consistency())
 
     app_js = (ROOT / "assets/js/app.js").read_text(encoding="utf-8")
     if "editorial.css" in app_js:
