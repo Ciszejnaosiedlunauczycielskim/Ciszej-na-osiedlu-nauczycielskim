@@ -34,6 +34,7 @@ REQUIRED_HOME_IDS = {
     "co-wiemy",
     "czego-chcemy",
     "status",
+    "odpowiedz-miasta",
     "historia",
     "aktualnosci",
     "dane",
@@ -207,7 +208,6 @@ def check_page(page: Path) -> list[str]:
             "Nie chcemy zgadywać. Chcemy zmierzyć.",
             "Trzech rzeczy. W tej kolejności.",
             "159 mieszkańców",
-            "Petycja przyniosła zapowiedź. Teraz potrzeba konkretnego planu.",
             "Przy dokumentach dostępnych publicznie podajemy bezpośrednie linki",
         ):
             if required_text not in content:
@@ -224,7 +224,7 @@ def check_page(page: Path) -> list[str]:
                 errors.append(f"{page.name}: brak objaśnienia danych: {fragment}")
 
     if page.name == "zrodla.html":
-        for fragment in ("Kopia nieopublikowana", "Dokument dostępny z linku", "Pełna kopia poszukiwana"):
+        for fragment in ("Kopia nieopublikowana", "Dokument dostępny z linku", "Dokument posiadany"):
             if fragment not in content:
                 errors.append(f"{page.name}: brak informacji o dostępie do źródeł: {fragment}")
 
