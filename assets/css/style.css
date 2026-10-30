@@ -1585,8 +1585,8 @@ footer{background:#0b171d;color:#b7c2c7}
 @media(max-width:700px){.evidence-table{font-size:.86rem}.evidence-table th,.evidence-table td{padding:.65rem .75rem}.news-content h3{margin-top:1.35rem}}
 
 
-/* Audyt Playwright 2026-10-30: tabela statusów przewija się we własnym kontenerze,
-   zamiast poszerzać całą stronę Aktualności na telefonie. */
+/* Szerokie tabele na telefonie przewijają się we własnym kontenerze,
+   zamiast poszerzać całą stronę. */
 .news-card,
 .news-content{min-width:0}
 .news-card .evidence-table-wrap{display:block;width:100%;max-width:100%;overflow-x:auto}
@@ -1612,7 +1612,6 @@ footer{background:#0b171d;color:#b7c2c7}
 .reader-glossary>div{min-width:0;padding:1rem;background:#fff;border:1px solid var(--line);border-radius:.55rem}
 .reader-glossary strong{display:block;line-height:1.35;font-size:.98rem}
 .reader-glossary p{margin:.35rem 0 0;color:var(--muted);font-size:.88rem;line-height:1.5}
-.reader-toc+.section{scroll-margin-top:80px}
 @media(max-width:700px){
   .reader-compare{grid-template-columns:1fr;gap:.65rem}
   .reader-compare-item{padding:1rem}
